@@ -5,6 +5,15 @@
     "test": "web-test-runner \"src/**/*.test.ts\""
   },
   "dependencies": {
+    "@types/d3-color": "^2.0.1",
+    "@types/d3-interpolate": "^2.0.0",
+    "@types/lodash": "^4.14.170",
+    "@types/luxon": "^1.27.0",
+    "@vvo/tzdb": "^6.7.0",
+    "d3-color": "^3.0.1",
+    "d3-interpolate": "^3.0.1",
+    "lodash": "^4.17.21",
+    "luxon": "^1.27.0",
     "svelte": "^3.37.0"
   },
   "devDependencies": {
