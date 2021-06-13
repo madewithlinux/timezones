@@ -2,11 +2,12 @@ import { derived, readable, writable } from 'svelte/store';
 import { DateTime, Duration } from "luxon";
 import { round } from 'lodash';
 import { color } from 'd3-color';
+import query from "query-store";
 
 export const now = readable(DateTime.now(), function start(set) {
 	const interval = setInterval(() => {
 		set(DateTime.now());
-	}, 1000);
+	}, 5000);
 
 	return function stop() {
 		clearInterval(interval);
@@ -14,19 +15,25 @@ export const now = readable(DateTime.now(), function start(set) {
 });
 
 export const zones = writable([
-	DateTime.now().toLocal().zoneName,
-	"US/Eastern",
-	"US/Central",
-	"US/Mountain",
-	"US/Pacific",
+	// DateTime.now().toLocal().zoneName,
+	"America/New_York",
+	"America/Chicago",
+	"America/Denver",
+	"America/Los_Angeles",
+	// "US/Central",
+	// "Pacific",
+	// "US/Mountain",
+	// "US/Pacific",
 	"Europe/London",
 	"Japan",
 	"UTC",
-	// "America/New_York",
-	// "America/Chicago",
-])
+].map(tz => DateTime.now().setZone(tz).zoneName)
+)
 
-export const localTimeZone = writable(DateTime.now().toLocal().zoneName)
+// export const localTimeZone = writable(DateTime.now().toLocal().zoneName)
+export const localTimeZone = derived(query,
+	$query => $query.tz ?? DateTime.now().toLocal().zoneName
+)
 
 export const nowMinute = derived(now, $now => $now.startOf('minute'))
 export const nowHour = derived(nowMinute, $nowMinute => $nowMinute.startOf('hour'))
@@ -38,8 +45,10 @@ export const localDayStart = derived(
 
 export const MINUTES_PER_DAY = 24 * 60;
 
-export const barStartHour = writable(6)
-export const barEndHour = writable(12 + 8)
+// export const barStartHour = writable(6)
+// export const barEndHour = writable(12 + 8)
+export const barStartHour = derived(query, $query => Number($query.start ?? 7))
+export const barEndHour = derived(query, $query => Number($query.end ?? 12 + 8))
 
 export const dayFraction = derived(
 	[nowMinute, localDayStart, barStartHour, barEndHour, localTimeZone],
@@ -91,16 +100,10 @@ export const hourGradient = (localDayStart: DateTime, zone: string, backgroundCo
 
 		const start = round(100 * i / length)
 		const end = round(100 * (i + 1) / length)
-		if (i == 0) {
-			return `${color} ${end}%`
-		} else if (i + 1 == length) {
-			return `${color} ${start}%`
-		} else {
-			return `${color} ${start}% ${end}%`
-		}
+		return `linear-gradient(to right, transparent ${start}%, ${color} ${start}% ${end}%, transparent ${end}%)`
 	})
 
-	return `linear-gradient(to right, ${colors.join(', ')})`
+	return colors.join(',\n')
 }
 
 
