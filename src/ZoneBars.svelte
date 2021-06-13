@@ -1,4 +1,3 @@
-<!-- ZoneBars.svelte -->
 <script lang="ts">
   import colors from "./colors";
   import { zones } from "./timeStores";
