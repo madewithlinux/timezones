@@ -14,6 +14,7 @@ export const now = readable(DateTime.now(), function start(set) {
 });
 
 export const zones = writable([
+	DateTime.now().toLocal().zoneName,
 	"US/Eastern",
 	"US/Central",
 	"US/Mountain",
@@ -25,10 +26,14 @@ export const zones = writable([
 	// "America/Chicago",
 ])
 
+export const localTimeZone = writable(DateTime.now().toLocal().zoneName)
+
 export const nowMinute = derived(now, $now => $now.startOf('minute'))
 export const nowHour = derived(nowMinute, $nowMinute => $nowMinute.startOf('hour'))
-export const localDayStart = derived(nowHour, $nowHour => $nowHour.startOf('day'))
-export const localTimeZone = derived(nowHour, $nowHour => $nowHour.toLocal().zoneName)
+export const localDayStart = derived(
+	[nowHour, localTimeZone],
+	([$nowHour, $localTimeZone]) => $nowHour.setZone($localTimeZone).startOf('day')
+)
 
 
 export const MINUTES_PER_DAY = 24 * 60;
@@ -37,9 +42,9 @@ export const barStartHour = writable(6)
 export const barEndHour = writable(12 + 8)
 
 export const dayFraction = derived(
-	[nowMinute, localDayStart, barStartHour, barEndHour],
-	([$nowMinute, $localDayStart, $barStartHour, $barEndHour]) => {
-		const barStartTime = $localDayStart.plus({ hours: $barStartHour }).toLocal()
+	[nowMinute, localDayStart, barStartHour, barEndHour, localTimeZone],
+	([$nowMinute, $localDayStart, $barStartHour, $barEndHour, $localTimeZone]) => {
+		const barStartTime = $localDayStart.plus({ hours: $barStartHour }).setZone($localTimeZone)
 		const barTotalMinutes = ($barEndHour - $barStartHour) * 60
 		const { minutes } = $nowMinute.diff(barStartTime, "minutes")
 		const ratio = Math.round(minutes) / barTotalMinutes
@@ -78,6 +83,7 @@ export const hourDarkness = (hour: number) => {
 export const hourGradient = (localDayStart: DateTime, zone: string, backgroundColor: string, hours: number[]) => {
 	const length = hours.length
 	const baseColor = color(backgroundColor)!
+	console.log('localDayStart.zoneName', localDayStart.zoneName)
 
 	const colors = hours.map((hour, i) => {
 		const zoneHour = localDayStart.plus({ hours: hour }).setZone(zone).hour

@@ -12,3 +12,10 @@ yarn add \
   @types/luxon          \
   @vvo/tzdb
 ```
+
+# libraries that might be cool to use
+https://github.com/buhrmi/query-store
+https://github.com/plrenaudin/svelte-storez
+https://github.com/PixievoltNo1/svelte-writable-derived
+
+

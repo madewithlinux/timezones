@@ -1,21 +1,13 @@
 <script lang="ts">
-  import ZoneBars from "./ZoneBars.svelte";
-  import CurrentTimeCursor from "./CurrentTimeCursor.svelte";
+  import ConfigPanel from "./ConfigPanel.svelte";
   import Reference from "./Reference.svelte";
-  import MouseListener from "./MouseListener.svelte";
-  import Position from "./Position.svelte";
-  import MouseTimeCursor from "./MouseTimeCursor.svelte";
-  import TimeCursor from "./TimeCursor.svelte";
+  import ZoneGrid from "./ZoneGrid.svelte";
 </script>
 
 <main>
-  <h2>timezones</h2>
-  <div class="grid">
-    <ZoneBars />
-    <CurrentTimeCursor />
-    <MouseTimeCursor />
-    <MouseListener />
-  </div>
+  <h1>timezones</h1>
+  <ZoneGrid />
+  <ConfigPanel />
   <Reference />
 </main>
 
@@ -33,24 +25,6 @@
     padding: 1em;
     max-width: 240px;
     margin: 0 auto;
-  }
-
-  .grid {
-    position: relative;
-    z-index: 0;
-    display: grid;
-    grid-template-columns: max-content auto;
-    grid-template-areas: label time bar;
-    /* gap: 5px; */
-    column-gap: 2px;
-    row-gap: 10px;
-  }
-
-  h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
-    font-size: 4em;
-    font-weight: 100;
   }
 
   @media (min-width: 640px) {
