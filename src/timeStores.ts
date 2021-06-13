@@ -28,6 +28,7 @@ export const zones = writable([
 export const nowMinute = derived(now, $now => $now.startOf('minute'))
 export const nowHour = derived(nowMinute, $nowMinute => $nowMinute.startOf('hour'))
 export const localDayStart = derived(nowHour, $nowHour => $nowHour.startOf('day'))
+export const localTimeZone = derived(nowHour, $nowHour => $nowHour.toLocal().zoneName)
 
 
 export const MINUTES_PER_DAY = 24 * 60;
@@ -76,7 +77,7 @@ export const hourDarkness = (hour: number) => {
 
 export const hourGradient = (localDayStart: DateTime, zone: string, backgroundColor: string, hours: number[]) => {
 	const length = hours.length
-	const baseColor = color(backgroundColor)
+	const baseColor = color(backgroundColor)!
 
 	const colors = hours.map((hour, i) => {
 		const zoneHour = localDayStart.plus({ hours: hour }).setZone(zone).hour
@@ -95,3 +96,11 @@ export const hourGradient = (localDayStart: DateTime, zone: string, backgroundCo
 
 	return `linear-gradient(to right, ${colors.join(', ')})`
 }
+
+
+export const cursorPosition = writable({
+	active: false,
+	marginLeft: 0,
+	ratio: 0.0,
+	time: DateTime.now(),
+})

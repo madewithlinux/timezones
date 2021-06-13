@@ -2,7 +2,8 @@
   "scripts": {
     "start": "snowpack dev",
     "build": "snowpack build",
-    "test": "web-test-runner \"src/**/*.test.ts\""
+    "test": "web-test-runner \"src/**/*.test.ts\"",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
     "@types/d3-color": "^2.0.1",
@@ -14,7 +15,8 @@
     "d3-interpolate": "^3.0.1",
     "lodash": "^4.17.21",
     "luxon": "^1.27.0",
-    "svelte": "^3.37.0"
+    "svelte": "^3.37.0",
+    "svelte-check": "^2.0.0"
   },
   "devDependencies": {
     "@snowpack/plugin-dotenv": "^2.1.0",

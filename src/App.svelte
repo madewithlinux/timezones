@@ -1,7 +1,8 @@
 <script lang="ts">
   import ZoneBars from "./ZoneBars.svelte";
-  import GridTimeCursor from "./GridTimeCursor.svelte";
+  import GridTimeCursor from "./CurrentTimeCursor.svelte";
   import Reference from "./Reference.svelte";
+import MouseListener from "./MouseListener.svelte";
 </script>
 
 <main>
@@ -9,11 +10,20 @@
   <div class="grid">
     <GridTimeCursor />
     <ZoneBars />
+    <MouseListener />
   </div>
   <Reference/>
 </main>
 
 <style>
+	:global(body) {
+	/* color: #333; */
+	margin: 0;
+	padding: 8px;
+	box-sizing: border-box;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
   main {
     padding: 1em;
     max-width: 240px;
@@ -24,7 +34,7 @@
     position: relative;
     z-index: 0;
     display: grid;
-    grid-template-columns: max-content max-content auto;
+    grid-template-columns: max-content auto;
     grid-template-areas: label time bar;
     /* gap: 5px; */
     column-gap: 2px;

@@ -1,56 +1,28 @@
 <!-- ZoneBars.svelte -->
 <script lang="ts">
-  import { DateTime } from "luxon";
-
-  import { now, zones } from "./timeStores";
-  import { toCanonicalTimeZoneName } from "./timeZoneUtils";
-  import ZonedTimeDisplay from "./ZonedTimeDisplay.svelte";
-
   import colors from "./colors";
+  import { zones } from "./timeStores";
   import ZoneHours from "./ZoneHours.svelte";
 
-  export let timeFormat = DateTime.TIME_SIMPLE;
-
-  export let current_zones = $zones.map((tz) => [
-    tz,
-    toCanonicalTimeZoneName(tz),
+  $: zones_with_colors = $zones.map((zone, i) => [
+    zone,
+    colors[i % colors.length],
   ]);
-
-  const bgColor = (i) => `background-color: ${colors[i % colors.length]};`;
 </script>
 
-{#each current_zones as [label, ianaTimeZone], i (label)}
-  <div class="label" style={bgColor(i)}>{label}</div>
-  <div class="time" style={bgColor(i)}>
-    <ZonedTimeDisplay {ianaTimeZone} {timeFormat} />
-  </div>
-  <div class="hour-container">
-    <ZoneHours zone={ianaTimeZone} backgroundColor={colors[i % colors.length]} />
-  </div>
+{#each zones_with_colors as [zone, color] (zone)}
+  <div class="label" style="background-color: {color};">{zone}</div>
+  <ZoneHours {zone} backgroundColor={color} />
 {/each}
 
 <style>
-
-  .label, .time {
+  .label {
     padding: 20px;
+    padding-right: 40px;
   }
 
   .label {
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
-  }
-
-  .hour-container {
-    position: relative;
-    z-index: 0;
-  }
-
-  .hour {
-    position: absolute;
-    top: 0;
-    left: calc(var(--index) * (100% / 23));
-    width: 1px;
-    height: 100%;
-    background-color: black;
   }
 </style>

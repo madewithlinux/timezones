@@ -8,7 +8,7 @@
   <div class="inner cursor" />
   <div class="inner">
     <div style="transform: translateY(-100%);">
-      <ZonedTimeDisplay ianaTimeZone="America/Chicago" />
+      <ZonedTimeDisplay />
     </div>
   </div>
 </div>
@@ -20,7 +20,7 @@
     top: 0;
     width: 0;
     left: calc(var(--dayFraction) * 100%);
-    grid-column-start: 3;
+    grid-column-start: 2;
     grid-column-end: span 1;
     justify-self: stretch;
     align-self: stretch;
@@ -36,6 +36,6 @@
     width: 2px;
     height: 100%;
     background-color: #444;
-    z-index: 100;
+    z-index: -100;
   }
 </style>
