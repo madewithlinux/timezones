@@ -21,15 +21,18 @@ export default {
   ],
   optimize: {
     /* Example: Bundle your final build: */
-    // "bundle": true,
+    "bundle": true,
   },
   packageOptions: {
-    /* ... */
+    rollup: {
+      dedupe: ['svelte'],
+    },
   },
   devOptions: {
     /* ... */
   },
   buildOptions: {
-    /* ... */
+    // This should make the built HTML references work in any base URL
+    baseUrl: '.',
   },
 };
