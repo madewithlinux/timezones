@@ -4,6 +4,16 @@ import { round } from 'lodash';
 import { color } from 'd3-color';
 import query from "query-store";
 
+export const nowSecond = readable(DateTime.now(), function start(set) {
+	const interval = setInterval(() => {
+		set(DateTime.now());
+	}, 1000);
+
+	return function stop() {
+		clearInterval(interval);
+	};
+});
+
 export const now = readable(DateTime.now(), function start(set) {
 	const interval = setInterval(() => {
 		set(DateTime.now());
@@ -45,10 +55,8 @@ export const localDayStart = derived(
 
 export const MINUTES_PER_DAY = 24 * 60;
 
-// export const barStartHour = writable(6)
-// export const barEndHour = writable(12 + 8)
 export const barStartHour = derived(query, $query => Number($query.start ?? 7))
-export const barEndHour = derived(query, $query => Number($query.end ?? 12 + 8))
+export const barEndHour = derived(query, $query => Number($query.end ?? 19))
 
 export const dayFraction = derived(
 	[nowMinute, localDayStart, barStartHour, barEndHour, localTimeZone],
@@ -92,7 +100,7 @@ export const hourDarkness = (hour: number) => {
 export const hourGradient = (localDayStart: DateTime, zone: string, backgroundColor: string, hours: number[]) => {
 	const length = hours.length
 	const baseColor = color(backgroundColor)!
-	console.log('localDayStart.zoneName', localDayStart.zoneName)
+	// console.log('localDayStart.zoneName', localDayStart.zoneName)
 
 	const colors = hours.map((hour, i) => {
 		const zoneHour = localDayStart.plus({ hours: hour }).setZone(zone).hour

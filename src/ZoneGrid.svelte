@@ -19,7 +19,6 @@
     display: grid;
     grid-template-columns: max-content auto;
     grid-template-areas: label time bar;
-    /* gap: 5px; */
     column-gap: 2px;
     row-gap: 10px;
   }

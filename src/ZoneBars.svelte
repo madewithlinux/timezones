@@ -24,4 +24,11 @@
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
   }
+
+  @media (max-width: 1000px) {
+    .label {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+  }
 </style>

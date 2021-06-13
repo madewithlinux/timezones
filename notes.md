@@ -19,3 +19,7 @@ https://github.com/plrenaudin/svelte-storez
 https://github.com/PixievoltNo1/svelte-writable-derived
 
 
+# adding my own types for a third-party javascript library
+https://www.typescriptlang.org/docs/handbook/declaration-files/templates/module-d-ts.html#testing-your-types
+
+

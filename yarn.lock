@@ -2917,6 +2917,13 @@ qs@~6.5.2:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
 
+query-store@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/query-store/-/query-store-1.1.1.tgz#d726020767e5b854c07840658d1461926f82e016"
+  integrity sha512-6Yj7Qsy911EejqFvcpfKcLoxlZl6XMqB6JkVGBGlmieMF65ta1+mtVoIWTm3rFgom1yKTyYp6u6vTR1earpf7w==
+  dependencies:
+    svelte "^3.20.1"
+
 query-string@^4.1.0:
   version "4.3.4"
   resolved "https://registry.yarnpkg.com/query-string/-/query-string-4.3.4.tgz#bbb693b9ca915c232515b228b1a02b609043dbeb"
@@ -3411,7 +3418,7 @@ svelte-preprocess@^4.0.0, svelte-preprocess@^4.7.2:
     detect-indent "^6.0.0"
     strip-indent "^3.0.0"
 
-svelte@^3.37.0:
+svelte@^3.20.1, svelte@^3.37.0:
   version "3.38.2"
   resolved "https://registry.yarnpkg.com/svelte/-/svelte-3.38.2.tgz#55e5c681f793ae349b5cc2fe58e5782af4275ef5"
   integrity sha512-q5Dq0/QHh4BLJyEVWGe7Cej5NWs040LWjMbicBGZ+3qpFWJ1YObRmUDZKbbovddLC9WW7THTj3kYbTOFmU9fbg==

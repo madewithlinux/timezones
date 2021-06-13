@@ -1,4 +1,3 @@
-<!-- GridTimeCursor.svelte -->
 <script lang="ts">
   import { writable } from "svelte/store";
   import {
@@ -30,15 +29,32 @@
       $cursorPosition.active = false;
     }
   }
+
+  let inst: HTMLDivElement;
 </script>
+
+<svelte:window
+  on:click={(e) => {
+    if (e.target !== inst && mouseActive) {
+      mouseActive = false;
+    }
+  }}
+/>
 
 <div
   class="area"
   bind:clientWidth
+  bind:this={inst}
   on:mouseenter|self={(e) => (mouseActive = true)}
   on:mouseleave|self={(e) => (mouseActive = false)}
   on:mousemove|self={(e) => ($xCoord = e.offsetX)}
   on:click|self={(e) => ($xCoord = e.offsetX)}
+  on:pointermove|self={(e) => {
+    // we have to mark it active on a touch event manually,
+    // since the normal enter/leave doesn't happen
+    $xCoord = e.offsetX;
+    mouseActive = true;
+  }}
 />
 
 <style>
