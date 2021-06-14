@@ -1,92 +1,8 @@
-var __create = Object.create;
 var __defProp = Object.defineProperty;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
-var __commonJS = (callback, module) => () => {
-  if (!module) {
-    module = {exports: {}};
-    callback(module.exports, module);
-  }
-  return module.exports;
-};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, {get: all[name], enumerable: true});
 };
-var __exportStar = (target, module, desc) => {
-  if (module && typeof module === "object" || typeof module === "function") {
-    for (let key of __getOwnPropNames(module))
-      if (!__hasOwnProp.call(target, key) && key !== "default")
-        __defProp(target, key, {get: () => module[key], enumerable: !(desc = __getOwnPropDesc(module, key)) || desc.enumerable});
-  }
-  return target;
-};
-var __toModule = (module) => {
-  return __exportStar(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? {get: () => module.default, enumerable: true} : {value: module, enumerable: true})), module);
-};
-
-// build/dist/query-store.js
-var require_query_store = __commonJS((exports, module) => {
-  var query3 = writable({});
-  var keepHistory = [];
-  var disableHistory = false;
-  query3.setWithoutHistory = (params) => {
-    disableHistory = true;
-    query3.set(params);
-    disableHistory = false;
-  };
-  query3.keepHistory = function(param) {
-    keepHistory.push(param);
-  };
-  if (typeof window !== "undefined") {
-    let initial = {};
-    const handlePop = () => {
-      const params = new URLSearchParams(window.location.search);
-      for (let [param, value] of params) {
-        try {
-          value = JSON.parse(value);
-        } catch {
-        }
-        initial[param] = value;
-      }
-      query3.setWithoutHistory(initial);
-    };
-    handlePop();
-    window.addEventListener("popstate", handlePop);
-    let oldParams = initial;
-    query3.subscribe((params) => {
-      if (disableHistory)
-        return;
-      if (typeof history == "undefined")
-        return;
-      let search = "";
-      let pushHistory = false;
-      for (const param in params) {
-        let value = params[param];
-        search += search ? "&" : "?";
-        if (oldParams[param] !== value && keepHistory.indexOf(param) !== -1) {
-          pushHistory = true;
-        }
-        if (typeof value == "undefined")
-          continue;
-        if (!!value && typeof value == "object")
-          value = JSON.stringify(value);
-        value = encodeURIComponent(value);
-        search += param + "=" + value;
-      }
-      oldParams = JSON.parse(JSON.stringify(params));
-      if (pushHistory) {
-        history.pushState(history.state, document.title, window.location.pathname + search);
-      } else {
-        history.replaceState(history.state, document.title, window.location.pathname + search);
-      }
-    });
-  }
-  module.exports = query3;
-});
 
 // build/_snowpack/env.js
 var env_exports = {};
@@ -126,15 +42,15 @@ function safe_not_equal(a, b) {
 function is_empty(obj) {
   return Object.keys(obj).length === 0;
 }
-function subscribe(store, ...callbacks) {
-  if (store == null) {
+function subscribe(store2, ...callbacks) {
+  if (store2 == null) {
     return noop;
   }
-  const unsub = store.subscribe(...callbacks);
+  const unsub = store2.subscribe(...callbacks);
   return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
 }
-function component_subscribe(component, store, callback) {
-  component.$$.on_destroy.push(subscribe(store, callback));
+function component_subscribe(component, store2, callback) {
+  component.$$.on_destroy.push(subscribe(store2, callback));
 }
 function create_slot(definition, ctx, $$scope, fn) {
   if (definition) {
@@ -184,8 +100,8 @@ function compute_slots(slots) {
   }
   return result;
 }
-function set_store_value(store, ret, value = ret) {
-  store.set(value);
+function set_store_value(store2, ret, value = ret) {
+  store2.set(value);
   return ret;
 }
 var is_client = typeof window !== "undefined";
@@ -858,7 +774,7 @@ function derived(stores, fn, initial_value) {
         cleanup = is_function(result) ? result : noop;
       }
     };
-    const unsubscribers = stores_array.map((store, i) => subscribe(store, (value) => {
+    const unsubscribers = stores_array.map((store2, i) => subscribe(store2, (value) => {
       values[i] = value;
       pending &= ~(1 << i);
       if (inited) {
@@ -10568,8 +10484,65 @@ function hsl2rgb(h, m1, m2) {
   return (h < 60 ? m1 + (m2 - m1) * h / 60 : h < 180 ? m2 : h < 240 ? m1 + (m2 - m1) * (240 - h) / 60 : m1) * 255;
 }
 
+// build/dist/query-store.js
+var query = writable({});
+var keepHistory = [];
+var disableHistory = false;
+query.setWithoutHistory = (params) => {
+  disableHistory = true;
+  query.set(params);
+  disableHistory = false;
+};
+query.keepHistory = function(param) {
+  keepHistory.push(param);
+};
+if (typeof window !== "undefined") {
+  let initial = {};
+  const handlePop = () => {
+    const params = new URLSearchParams(window.location.search);
+    for (let [param, value] of params) {
+      try {
+        value = JSON.parse(value);
+      } catch {
+      }
+      initial[param] = value;
+    }
+    query.setWithoutHistory(initial);
+  };
+  handlePop();
+  window.addEventListener("popstate", handlePop);
+  let oldParams = initial;
+  query.subscribe((params) => {
+    if (disableHistory)
+      return;
+    if (typeof history == "undefined")
+      return;
+    let search = "";
+    let pushHistory = false;
+    for (const param in params) {
+      let value = params[param];
+      search += search ? "&" : "?";
+      if (oldParams[param] !== value && keepHistory.indexOf(param) !== -1) {
+        pushHistory = true;
+      }
+      if (typeof value == "undefined")
+        continue;
+      if (!!value && typeof value == "object")
+        value = JSON.stringify(value);
+      value = encodeURIComponent(value);
+      search += param + "=" + value;
+    }
+    oldParams = JSON.parse(JSON.stringify(params));
+    if (pushHistory) {
+      history.pushState(history.state, document.title, window.location.pathname + search);
+    } else {
+      history.replaceState(history.state, document.title, window.location.pathname + search);
+    }
+  });
+}
+var query_store_default = query;
+
 // build/dist/timeStores.js
-var import_query_store = __toModule(require_query_store());
 var nowSecond = readable(DateTime.now(), function start(set) {
   const interval = setInterval(() => {
     set(DateTime.now());
@@ -10595,13 +10568,13 @@ var zones = writable([
   "Japan",
   "UTC"
 ].map((tz) => DateTime.now().setZone(tz).zoneName));
-var localTimeZone = derived(import_query_store.default, ($query) => $query.tz ?? DateTime.now().toLocal().zoneName);
+var localTimeZone = derived(query_store_default, ($query) => $query.tz ?? DateTime.now().toLocal().zoneName);
 var nowMinute = derived(now3, ($now) => $now.startOf("minute"));
 var nowHour = derived(nowMinute, ($nowMinute) => $nowMinute.startOf("hour"));
 var localDayStart = derived([nowHour, localTimeZone], ([$nowHour, $localTimeZone]) => $nowHour.setZone($localTimeZone).startOf("day"));
 var MINUTES_PER_DAY = 24 * 60;
-var barStartHour = derived(import_query_store.default, ($query) => Number($query.start ?? 7));
-var barEndHour = derived(import_query_store.default, ($query) => Number($query.end ?? 19));
+var barStartHour = derived(query_store_default, ($query) => Number($query.start ?? 7));
+var barEndHour = derived(query_store_default, ($query) => Number($query.end ?? 19));
 var dayFraction = derived([nowMinute, localDayStart, barStartHour, barEndHour, localTimeZone], ([$nowMinute, $localDayStart, $barStartHour, $barEndHour, $localTimeZone]) => {
   const barStartTime = $localDayStart.plus({hours: $barStartHour}).setZone($localTimeZone);
   const barTotalMinutes = ($barEndHour - $barStartHour) * 60;
@@ -10659,7 +10632,6 @@ var cursorPosition = writable({
 });
 
 // build/dist/ConfigPanel.svelte.js
-var import_query_store2 = __toModule(require_query_store());
 function get_each_context(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[11] = list[i];
@@ -10873,34 +10845,34 @@ function instance($$self, $$props, $$invalidate) {
   let $localTimeZone;
   let $barStartHour;
   let $barEndHour;
-  component_subscribe($$self, import_query_store2.default, ($$value) => $$invalidate(0, $query = $$value));
+  component_subscribe($$self, query_store_default, ($$value) => $$invalidate(0, $query = $$value));
   component_subscribe($$self, zones, ($$value) => $$invalidate(1, $zones = $$value));
   component_subscribe($$self, localTimeZone, ($$value) => $$invalidate(2, $localTimeZone = $$value));
   component_subscribe($$self, barStartHour, ($$value) => $$invalidate(3, $barStartHour = $$value));
   component_subscribe($$self, barEndHour, ($$value) => $$invalidate(4, $barEndHour = $$value));
   function select_change_handler() {
     $query.tz = select_value(this);
-    import_query_store2.default.set($query);
+    query_store_default.set($query);
   }
   function input0_input_handler() {
     $query.start = to_number(this.value);
-    import_query_store2.default.set($query);
+    query_store_default.set($query);
   }
   const focus_handler = () => {
     if (isNil($query.start)) {
-      set_store_value(import_query_store2.default, $query.start = String($barStartHour), $query);
+      set_store_value(query_store_default, $query.start = String($barStartHour), $query);
     }
   };
   function input1_input_handler() {
     $query.end = to_number(this.value);
-    import_query_store2.default.set($query);
+    query_store_default.set($query);
   }
   const focus_handler_1 = () => {
     if (isNil($query.end)) {
-      set_store_value(import_query_store2.default, $query.end = String($barEndHour), $query);
+      set_store_value(query_store_default, $query.end = String($barEndHour), $query);
     }
   };
-  const click_handler = () => set_store_value(import_query_store2.default, $query = {}, $query);
+  const click_handler = () => set_store_value(query_store_default, $query = {}, $query);
   return [
     $query,
     $zones,
@@ -10929,8 +10901,10 @@ function create_fragment2(ctx) {
   return {
     c() {
       div = element("div");
-      div.innerHTML = `<h2>helpful reference information</h2> 
-  <ul><li><a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">List of tz database time zones</a></li></ul>`;
+      div.innerHTML = `<h1>helpful reference information</h1> 
+  <ul><li class="svelte-y8zofw"><a target="_blank" rel="noreferrer noopener" href="https://www.google.com/search?q=how+to+set+timezone+in+windows+10">how to set timezone in windows 10</a></li> 
+    <li class="svelte-y8zofw"><a target="_blank" rel="noreferrer noopener" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">List of tz database time zones</a></li> 
+    <li class="svelte-y8zofw"><a target="_blank" rel="noreferrer noopener" href="https://github.com/madewithlinux/timezones/">source code of this page</a></li></ul>`;
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -12177,7 +12151,7 @@ function create_fragment13(ctx) {
       create_component(configpanel.$$.fragment);
       t2 = space();
       create_component(reference.$$.fragment);
-      attr(main, "class", "svelte-7r6wtg");
+      attr(main, "class", "svelte-1dbkcjb");
     },
     m(target, anchor) {
       insert(target, main, anchor);

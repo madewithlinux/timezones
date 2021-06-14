@@ -13,8 +13,9 @@ body {
     Cantarell,
     "Helvetica Neue",
     sans-serif;
+  font-size: 1.2rem;
 }
-main.svelte-7r6wtg {
+main.svelte-1dbkcjb {
   padding-left: 1em;
   padding-right: 1em;
   margin: 0 auto;
@@ -23,7 +24,7 @@ main.svelte-7r6wtg {
   body {
     padding: 0;
   }
-  main.svelte-7r6wtg {
+  main.svelte-1dbkcjb {
     max-width: none;
     padding-left: 10px;
     padding-right: 10px;
@@ -61,6 +62,11 @@ select.svelte-1w0tq5j {
 button.svelte-1w0tq5j {
   margin: 20px;
   padding: 10px;
+}
+
+/* build/dist/Reference.svelte.css */
+li.svelte-y8zofw {
+  margin-bottom: 10px;
 }
 
 /* build/dist/ZoneGrid.svelte.css */
