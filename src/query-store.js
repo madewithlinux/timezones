@@ -66,4 +66,5 @@ if (typeof window !== 'undefined') {
 }
 
 
-module.exports = query
+// module.exports = query
+export default query;
