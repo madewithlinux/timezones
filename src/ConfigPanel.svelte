@@ -1,6 +1,6 @@
 <script lang="ts">
   import { isNil } from "lodash";
-  import query from "./query-store";
+  import query from "query-store";
   import { barEndHour, barStartHour, localTimeZone, zones } from "./timeStores";
 </script>
 

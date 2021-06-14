@@ -2,7 +2,7 @@ import { derived, get, readable, writable } from 'svelte/store';
 import { DateTime, Duration } from "luxon";
 import { isNil, round } from 'lodash';
 import { color } from 'd3-color';
-import query from "./query-store";
+import query from "query-store";
 import { derivedMemo, derivedWithKey } from './derivedMemo';
 
 export const nowSecond = readable(DateTime.now(), function start(set) {

@@ -13,6 +13,8 @@ yarn add \
   @vvo/tzdb
 ```
 
+inspiration for a lot of the code: https://svelte.dev/repl/12d9350f9d6b44f78031e7391a6415bb?version=3.37.0
+
 # libraries that might be cool to use
 https://github.com/buhrmi/query-store
 https://github.com/plrenaudin/svelte-storez

@@ -1,4 +1,4 @@
-// declare module "query-store" {
+declare module "query-store" {
   import { Writable } from 'svelte/store';
 
   declare const query: Writable<{ [param: string]: string }> & {
@@ -11,4 +11,4 @@
   }
 
   export = query;
-// }
+}

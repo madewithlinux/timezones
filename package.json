@@ -18,7 +18,7 @@
     "d3-interpolate": "^3.0.1",
     "lodash": "^4.17.21",
     "luxon": "^1.27.0",
-    "query-store": "^1.1.1",
+    "query-store": "git://github.com/madewithlinux/query-store",
     "svelte": "^3.37.0",
     "svelte-check": "^2.0.0"
   },
