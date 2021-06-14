@@ -1,7 +1,6 @@
 <script lang="ts">
   import { zones, barStartHour, barEndHour, localTimeZone } from "./timeStores";
-  import query from "query-store";
-  import { DateTime } from "luxon";
+  import query from "./query-store";
   import { isNil } from "lodash";
 </script>
 
@@ -40,7 +39,6 @@
       }
     }}
   />
-
 </div>
 <button on:click={() => ($query = {})}>reset to defaults</button>
 

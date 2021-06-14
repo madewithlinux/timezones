@@ -2,7 +2,7 @@ import { derived, readable, writable } from 'svelte/store';
 import { DateTime, Duration } from "luxon";
 import { round } from 'lodash';
 import { color } from 'd3-color';
-import query from "query-store";
+import query from "./query-store";
 
 export const nowSecond = readable(DateTime.now(), function start(set) {
 	const interval = setInterval(() => {
