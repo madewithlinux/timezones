@@ -14,6 +14,15 @@
       <a
         target="_blank"
         rel="noreferrer noopener"
+        href="https://www.google.com/search?q=how+to+set+timezone+in+outlook"
+      >
+        how to set timezone in outlook
+      </a>
+    </li>
+    <li>
+      <a
+        target="_blank"
+        rel="noreferrer noopener"
         href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
       >
         List of tz database time zones
