@@ -32,34 +32,34 @@ main.svelte-1dbkcjb {
 }
 
 /* build/dist/ConfigPanel.svelte.css */
-.config.svelte-1w0tq5j {
+.config.svelte-qxgdyp {
   width: max-content;
   max-width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
-.config.svelte-1w0tq5j,
-label.svelte-1w0tq5j,
-input.svelte-1w0tq5j {
+.config.svelte-qxgdyp,
+label.svelte-qxgdyp,
+input.svelte-qxgdyp {
   font-size: 1.2rem;
 }
-label.svelte-1w0tq5j {
+label.svelte-qxgdyp {
   justify-self: stretch;
   align-self: stretch;
 }
-input.svelte-1w0tq5j,
-select.svelte-1w0tq5j {
+input.svelte-qxgdyp,
+select.svelte-qxgdyp {
   justify-self: end;
 }
-input[type=number].svelte-1w0tq5j {
+input[type=number].svelte-qxgdyp {
   width: 80px;
   text-align: end;
 }
-select.svelte-1w0tq5j {
+select.svelte-qxgdyp {
   width: min-content;
 }
-button.svelte-1w0tq5j {
+button.svelte-qxgdyp {
   margin: 20px;
   padding: 10px;
 }
