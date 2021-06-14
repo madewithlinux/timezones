@@ -1,8 +1,9 @@
-import { derived, readable, writable } from 'svelte/store';
+import { derived, get, readable, writable } from 'svelte/store';
 import { DateTime, Duration } from "luxon";
-import { round } from 'lodash';
+import { isNil, round } from 'lodash';
 import { color } from 'd3-color';
 import query from "./query-store";
+import { derivedMemo, derivedWithKey } from './derivedMemo';
 
 export const nowSecond = readable(DateTime.now(), function start(set) {
 	const interval = setInterval(() => {
@@ -17,7 +18,7 @@ export const nowSecond = readable(DateTime.now(), function start(set) {
 export const now = readable(DateTime.now(), function start(set) {
 	const interval = setInterval(() => {
 		set(DateTime.now());
-	}, 5000);
+	}, 1000);
 
 	return function stop() {
 		clearInterval(interval);
@@ -30,23 +31,27 @@ export const zones = writable([
 	"America/Chicago",
 	"America/Denver",
 	"America/Los_Angeles",
-	// "US/Central",
-	// "Pacific",
-	// "US/Mountain",
-	// "US/Pacific",
 	"Europe/London",
 	"Japan",
 	"UTC",
 ].map(tz => DateTime.now().setZone(tz).zoneName)
 )
 
-// export const localTimeZone = writable(DateTime.now().toLocal().zoneName)
 export const localTimeZone = derived(query,
 	$query => $query.tz ?? DateTime.now().toLocal().zoneName
 )
 
-export const nowMinute = derived(now, $now => $now.startOf('minute'))
-export const nowHour = derived(nowMinute, $nowMinute => $nowMinute.startOf('hour'))
+
+export const nowMinute = derivedWithKey(
+	now,
+	$now => $now.startOf('minute'),
+	$nowMinute => $nowMinute.toISO(),
+)
+export const nowHour = derivedWithKey(
+	nowMinute,
+	$nowMinute => $nowMinute.startOf('hour'),
+	$nowHour => $nowHour.toISO(),
+)
 export const localDayStart = derived(
 	[nowHour, localTimeZone],
 	([$nowHour, $localTimeZone]) => $nowHour.setZone($localTimeZone).startOf('day')
@@ -56,7 +61,10 @@ export const localDayStart = derived(
 export const MINUTES_PER_DAY = 24 * 60;
 
 export const barStartHour = derived(query, $query => Number($query.start ?? 7))
-export const barEndHour = derived(query, $query => Number($query.end ?? 19))
+export const barEndHour = derived(
+	[query, barStartHour],
+	([$query, $barStartHour]) => Math.max(Number($query.end ?? 19), $barStartHour + 1),
+)
 
 export const dayFraction = derived(
 	[nowMinute, localDayStart, barStartHour, barEndHour, localTimeZone],

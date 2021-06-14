@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { zones, barStartHour, barEndHour, localTimeZone } from "./timeStores";
-  import query from "./query-store";
   import { isNil } from "lodash";
+  import query from "./query-store";
+  import { barEndHour, barStartHour, localTimeZone, zones } from "./timeStores";
 </script>
 
 <h1>config</h1>
@@ -17,8 +17,9 @@
   <input
     id="barStartHour"
     type="number"
-    bind:value={$query.start}
+    max={String($barEndHour - 1)}
     placeholder={String($barStartHour)}
+    bind:value={$query.start}
     on:focus={() => {
       if (isNil($query.start)) {
         $query.start = String($barStartHour);
@@ -30,9 +31,9 @@
   <input
     id="barEndHour"
     type="number"
-    min={String($query.start ?? $barStartHour)}
-    bind:value={$query.end}
+    min={String($barStartHour + 1)}
     placeholder={String($barEndHour)}
+    bind:value={$query.end}
     on:focus={() => {
       if (isNil($query.end)) {
         $query.end = String($barEndHour);
@@ -44,7 +45,6 @@
 
 <style>
   .config {
-    /* width: min(max-content, 100%); */
     width: max-content;
     max-width: 100%;
     display: grid;
