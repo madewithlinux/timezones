@@ -1,8 +1,92 @@
+var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+var __commonJS = (callback, module) => () => {
+  if (!module) {
+    module = {exports: {}};
+    callback(module.exports, module);
+  }
+  return module.exports;
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, {get: all[name], enumerable: true});
 };
+var __exportStar = (target, module, desc) => {
+  if (module && typeof module === "object" || typeof module === "function") {
+    for (let key of __getOwnPropNames(module))
+      if (!__hasOwnProp.call(target, key) && key !== "default")
+        __defProp(target, key, {get: () => module[key], enumerable: !(desc = __getOwnPropDesc(module, key)) || desc.enumerable});
+  }
+  return target;
+};
+var __toModule = (module) => {
+  return __exportStar(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? {get: () => module.default, enumerable: true} : {value: module, enumerable: true})), module);
+};
+
+// build/dist/query-store.js
+var require_query_store = __commonJS((exports, module) => {
+  var query3 = writable({});
+  var keepHistory = [];
+  var disableHistory = false;
+  query3.setWithoutHistory = (params) => {
+    disableHistory = true;
+    query3.set(params);
+    disableHistory = false;
+  };
+  query3.keepHistory = function(param) {
+    keepHistory.push(param);
+  };
+  if (typeof window !== "undefined") {
+    let initial = {};
+    const handlePop = () => {
+      const params = new URLSearchParams(window.location.search);
+      for (let [param, value] of params) {
+        try {
+          value = JSON.parse(value);
+        } catch {
+        }
+        initial[param] = value;
+      }
+      query3.setWithoutHistory(initial);
+    };
+    handlePop();
+    window.addEventListener("popstate", handlePop);
+    let oldParams = initial;
+    query3.subscribe((params) => {
+      if (disableHistory)
+        return;
+      if (typeof history == "undefined")
+        return;
+      let search = "";
+      let pushHistory = false;
+      for (const param in params) {
+        let value = params[param];
+        search += search ? "&" : "?";
+        if (oldParams[param] !== value && keepHistory.indexOf(param) !== -1) {
+          pushHistory = true;
+        }
+        if (typeof value == "undefined")
+          continue;
+        if (!!value && typeof value == "object")
+          value = JSON.stringify(value);
+        value = encodeURIComponent(value);
+        search += param + "=" + value;
+      }
+      oldParams = JSON.parse(JSON.stringify(params));
+      if (pushHistory) {
+        history.pushState(history.state, document.title, window.location.pathname + search);
+      } else {
+        history.replaceState(history.state, document.title, window.location.pathname + search);
+      }
+    });
+  }
+  module.exports = query3;
+});
 
 // build/_snowpack/env.js
 var env_exports = {};
@@ -15,7 +99,7 @@ var MODE = "production";
 var NODE_ENV = "production";
 var SSR = false;
 
-// build/_snowpack/pkg/common/index-c26a2db0.js
+// build/_snowpack/pkg/common/index-de5b1ebe.js
 function noop() {
 }
 var identity = (x) => x;
@@ -52,11 +136,52 @@ function subscribe(store, ...callbacks) {
 function component_subscribe(component, store, callback) {
   component.$$.on_destroy.push(subscribe(store, callback));
 }
+function create_slot(definition, ctx, $$scope, fn) {
+  if (definition) {
+    const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
+    return definition[0](slot_ctx);
+  }
+}
+function get_slot_context(definition, ctx, $$scope, fn) {
+  return definition[1] && fn ? assign($$scope.ctx.slice(), definition[1](fn(ctx))) : $$scope.ctx;
+}
+function get_slot_changes(definition, $$scope, dirty, fn) {
+  if (definition[2] && fn) {
+    const lets = definition[2](fn(dirty));
+    if ($$scope.dirty === void 0) {
+      return lets;
+    }
+    if (typeof lets === "object") {
+      const merged = [];
+      const len = Math.max($$scope.dirty.length, lets.length);
+      for (let i = 0; i < len; i += 1) {
+        merged[i] = $$scope.dirty[i] | lets[i];
+      }
+      return merged;
+    }
+    return $$scope.dirty | lets;
+  }
+  return $$scope.dirty;
+}
+function update_slot(slot, slot_definition, ctx, $$scope, dirty, get_slot_changes_fn, get_slot_context_fn) {
+  const slot_changes = get_slot_changes(slot_definition, $$scope, dirty, get_slot_changes_fn);
+  if (slot_changes) {
+    const slot_context = get_slot_context(slot_definition, ctx, $$scope, get_slot_context_fn);
+    slot.p(slot_context, slot_changes);
+  }
+}
 function exclude_internal_props(props) {
   const result = {};
   for (const k in props)
     if (k[0] !== "$")
       result[k] = props[k];
+  return result;
+}
+function compute_slots(slots) {
+  const result = {};
+  for (const key in slots) {
+    result[key] = true;
+  }
   return result;
 }
 function set_store_value(store, ret, value = ret) {
@@ -99,6 +224,12 @@ function insert(target, node, anchor) {
 function detach(node) {
   node.parentNode.removeChild(node);
 }
+function destroy_each(iterations, detaching) {
+  for (let i = 0; i < iterations.length; i += 1) {
+    if (iterations[i])
+      iterations[i].d(detaching);
+  }
+}
 function element(name) {
   return document.createElement(name);
 }
@@ -127,6 +258,9 @@ function attr(node, attribute, value) {
   else if (node.getAttribute(attribute) !== value)
     node.setAttribute(attribute, value);
 }
+function to_number(value) {
+  return value === "" ? null : +value;
+}
 function children(element2) {
   return Array.from(element2.childNodes);
 }
@@ -135,8 +269,24 @@ function set_data(text2, data) {
   if (text2.wholeText !== data)
     text2.data = data;
 }
+function set_input_value(input, value) {
+  input.value = value == null ? "" : value;
+}
 function set_style(node, key, value, important) {
   node.style.setProperty(key, value, important ? "important" : "");
+}
+function select_option(select, value) {
+  for (let i = 0; i < select.options.length; i += 1) {
+    const option = select.options[i];
+    if (option.__value === value) {
+      option.selected = true;
+      return;
+    }
+  }
+}
+function select_value(select) {
+  const selected_option = select.querySelector(":checked") || select.options[0];
+  return selected_option && selected_option.__value;
 }
 var crossorigin;
 function is_crossorigin() {
@@ -459,7 +609,7 @@ function outro_and_destroy_block(block, lookup) {
     lookup.delete(block.key);
   });
 }
-function update_keyed_each(old_blocks, dirty, get_key, dynamic, ctx, list, lookup, node, destroy, create_each_block2, next, get_context) {
+function update_keyed_each(old_blocks, dirty, get_key, dynamic, ctx, list, lookup, node, destroy, create_each_block4, next, get_context) {
   let o = old_blocks.length;
   let n2 = list.length;
   let i = o;
@@ -475,7 +625,7 @@ function update_keyed_each(old_blocks, dirty, get_key, dynamic, ctx, list, looku
     const key = get_key(child_ctx);
     let block = lookup.get(key);
     if (!block) {
-      block = create_each_block2(key, child_ctx);
+      block = create_each_block4(key, child_ctx);
       block.c();
     } else if (dynamic) {
       block.p(child_ctx, dirty);
@@ -562,7 +712,7 @@ function make_dirty(component, i) {
   }
   component.$$.dirty[i / 31 | 0] |= 1 << i % 31;
 }
-function init(component, options, instance6, create_fragment8, not_equal2, props, dirty = [-1]) {
+function init(component, options, instance11, create_fragment14, not_equal2, props, dirty = [-1]) {
   const parent_component = current_component;
   set_current_component(component);
   const $$ = component.$$ = {
@@ -583,7 +733,7 @@ function init(component, options, instance6, create_fragment8, not_equal2, props
     skip_bound: false
   };
   let ready = false;
-  $$.ctx = instance6 ? instance6(component, options.props || {}, (i, ret, ...rest) => {
+  $$.ctx = instance11 ? instance11(component, options.props || {}, (i, ret, ...rest) => {
     const value = rest.length ? rest[0] : ret;
     if ($$.ctx && not_equal2($$.ctx[i], $$.ctx[i] = value)) {
       if (!$$.skip_bound && $$.bound[i])
@@ -596,7 +746,7 @@ function init(component, options, instance6, create_fragment8, not_equal2, props
   $$.update();
   ready = true;
   run_all($$.before_update);
-  $$.fragment = create_fragment8 ? create_fragment8($$.ctx) : false;
+  $$.fragment = create_fragment14 ? create_fragment14($$.ctx) : false;
   if (options.target) {
     if (options.hydrate) {
       const nodes = children(options.target);
@@ -635,32 +785,14 @@ var SvelteComponent = class {
   }
 };
 
-// build/dist/colors.js
-var colors = [
-  "#FFDE6B",
-  "#EF89EE",
-  "#F79F1E",
-  "#02B8FF",
-  "#9F84EC",
-  "#15CBC4",
-  "#0092FD",
-  "#F63A57",
-  "#A2CB39",
-  "#FF6E2F",
-  "#FEB8B9",
-  "#af7aa1",
-  "#7EFFF5"
-];
-var colors_default = colors;
-
 // build/_snowpack/pkg/svelte/store.js
 var subscriber_queue = [];
-function readable(value, start2) {
+function readable(value, start3) {
   return {
-    subscribe: writable(value, start2).subscribe
+    subscribe: writable(value, start3).subscribe
   };
 }
-function writable(value, start2 = noop) {
+function writable(value, start3 = noop) {
   let stop;
   const subscribers = [];
   function set(new_value) {
@@ -689,7 +821,7 @@ function writable(value, start2 = noop) {
     const subscriber = [run2, invalidate];
     subscribers.push(subscriber);
     if (subscribers.length === 1) {
-      stop = start2(set) || noop;
+      stop = start3(set) || noop;
     }
     run2(value);
     return () => {
@@ -2913,13 +3045,13 @@ function friendlyDuration(durationish) {
   }
 }
 var INVALID$1 = "Invalid Interval";
-function validateStartEnd(start2, end) {
-  if (!start2 || !start2.isValid) {
+function validateStartEnd(start3, end) {
+  if (!start3 || !start3.isValid) {
     return Interval.invalid("missing or invalid start");
   } else if (!end || !end.isValid) {
     return Interval.invalid("missing or invalid end");
-  } else if (end < start2) {
-    return Interval.invalid("end before start", `The end of an interval must be after its start, but you had start=${start2.toISO()} and end=${end.toISO()}`);
+  } else if (end < start3) {
+    return Interval.invalid("end before start", `The end of an interval must be after its start, but you had start=${start3.toISO()} and end=${end.toISO()}`);
   } else {
     return null;
   }
@@ -2942,8 +3074,8 @@ var Interval = class {
       return new Interval({invalid});
     }
   }
-  static fromDateTimes(start2, end) {
-    const builtStart = friendlyDateTime(start2), builtEnd = friendlyDateTime(end);
+  static fromDateTimes(start3, end) {
+    const builtStart = friendlyDateTime(start3), builtEnd = friendlyDateTime(end);
     const validateError = validateStartEnd(builtStart, builtEnd);
     if (validateError == null) {
       return new Interval({
@@ -2954,8 +3086,8 @@ var Interval = class {
       return validateError;
     }
   }
-  static after(start2, duration) {
-    const dur = friendlyDuration(duration), dt = friendlyDateTime(start2);
+  static after(start3, duration) {
+    const dur = friendlyDuration(duration), dt = friendlyDateTime(start3);
     return Interval.fromDateTimes(dt, dt.plus(dur));
   }
   static before(end, duration) {
@@ -2965,10 +3097,10 @@ var Interval = class {
   static fromISO(text2, opts) {
     const [s2, e] = (text2 || "").split("/", 2);
     if (s2 && e) {
-      let start2, startIsValid;
+      let start3, startIsValid;
       try {
-        start2 = DateTime.fromISO(s2, opts);
-        startIsValid = start2.isValid;
+        start3 = DateTime.fromISO(s2, opts);
+        startIsValid = start3.isValid;
       } catch (e2) {
         startIsValid = false;
       }
@@ -2980,12 +3112,12 @@ var Interval = class {
         endIsValid = false;
       }
       if (startIsValid && endIsValid) {
-        return Interval.fromDateTimes(start2, end);
+        return Interval.fromDateTimes(start3, end);
       }
       if (startIsValid) {
         const dur = Duration.fromISO(e, opts);
         if (dur.isValid) {
-          return Interval.after(start2, dur);
+          return Interval.after(start3, dur);
         }
       } else if (endIsValid) {
         const dur = Duration.fromISO(s2, opts);
@@ -3020,8 +3152,8 @@ var Interval = class {
   count(unit = "milliseconds") {
     if (!this.isValid)
       return NaN;
-    const start2 = this.start.startOf(unit), end = this.end.startOf(unit);
-    return Math.floor(end.diff(start2, unit).get(unit)) + 1;
+    const start3 = this.start.startOf(unit), end = this.end.startOf(unit);
+    return Math.floor(end.diff(start3, unit).get(unit)) + 1;
   }
   hasSame(unit) {
     return this.isValid ? this.isEmpty() || this.e.minus(1).hasSame(this.s, unit) : false;
@@ -3044,10 +3176,10 @@ var Interval = class {
       return false;
     return this.s <= dateTime && this.e > dateTime;
   }
-  set({start: start2, end} = {}) {
+  set({start: start3, end} = {}) {
     if (!this.isValid)
       return this;
-    return Interval.fromDateTimes(start2 || this.s, end || this.e);
+    return Interval.fromDateTimes(start3 || this.s, end || this.e);
   }
   splitAt(...dateTimes) {
     if (!this.isValid)
@@ -3139,17 +3271,17 @@ var Interval = class {
     return found;
   }
   static xor(intervals) {
-    let start2 = null, currentCount = 0;
+    let start3 = null, currentCount = 0;
     const results = [], ends = intervals.map((i) => [{time: i.s, type: "s"}, {time: i.e, type: "e"}]), flattened = Array.prototype.concat(...ends), arr = flattened.sort((a, b) => a.time - b.time);
     for (const i of arr) {
       currentCount += i.type === "s" ? 1 : -1;
       if (currentCount === 1) {
-        start2 = i.time;
+        start3 = i.time;
       } else {
-        if (start2 && +start2 !== +i.time) {
-          results.push(Interval.fromDateTimes(start2, i.time));
+        if (start3 && +start3 !== +i.time) {
+          results.push(Interval.fromDateTimes(start3, i.time));
         }
-        start2 = null;
+        start3 = null;
       }
     }
     return Interval.merge(results);
@@ -3990,19 +4122,19 @@ function quickDT(obj, zone) {
     o
   });
 }
-function diffRelative(start2, end, opts) {
+function diffRelative(start3, end, opts) {
   const round2 = isUndefined(opts.round) ? true : opts.round, format = (c, unit) => {
     c = roundTo(c, round2 || opts.calendary ? 0 : 2, true);
     const formatter = end.loc.clone(opts).relFormatter(opts);
     return formatter.format(c, unit);
   }, differ = (unit) => {
     if (opts.calendary) {
-      if (!end.hasSame(start2, unit)) {
-        return end.startOf(unit).diff(start2.startOf(unit), unit).get(unit);
+      if (!end.hasSame(start3, unit)) {
+        return end.startOf(unit).diff(start3.startOf(unit), unit).get(unit);
       } else
         return 0;
     } else {
-      return end.diff(start2, unit).get(unit);
+      return end.diff(start3, unit).get(unit);
     }
   };
   if (opts.unit) {
@@ -4014,7 +4146,7 @@ function diffRelative(start2, end, opts) {
       return format(count, unit);
     }
   }
-  return format(start2 > end ? -0 : 0, opts.units[opts.units.length - 1]);
+  return format(start3 > end ? -0 : 0, opts.units[opts.units.length - 1]);
 }
 var DateTime = class {
   constructor(config) {
@@ -5500,7 +5632,7 @@ var lodash = createCommonjsModule(function(module, exports) {
         return result2;
       }
       function lazyValue() {
-        var array = this.__wrapped__.value(), dir = this.__dir__, isArr = isArray(array), isRight = dir < 0, arrLength = isArr ? array.length : 0, view = getView(0, arrLength, this.__views__), start2 = view.start, end = view.end, length = end - start2, index = isRight ? end : start2 - 1, iteratees = this.__iteratees__, iterLength = iteratees.length, resIndex = 0, takeCount = nativeMin(length, this.__takeCount__);
+        var array = this.__wrapped__.value(), dir = this.__dir__, isArr = isArray(array), isRight = dir < 0, arrLength = isArr ? array.length : 0, view = getView(0, arrLength, this.__views__), start3 = view.start, end = view.end, length = end - start3, index = isRight ? end : start3 - 1, iteratees = this.__iteratees__, iterLength = iteratees.length, resIndex = 0, takeCount = nativeMin(length, this.__takeCount__);
         if (!isArr || !isRight && arrLength == length && takeCount == length) {
           return baseWrapperValue(array, this.__actions__);
         }
@@ -5931,19 +6063,19 @@ var lodash = createCommonjsModule(function(module, exports) {
         }
         return result2;
       }
-      function baseFill(array, value, start2, end) {
+      function baseFill(array, value, start3, end) {
         var length = array.length;
-        start2 = toInteger(start2);
-        if (start2 < 0) {
-          start2 = -start2 > length ? 0 : length + start2;
+        start3 = toInteger(start3);
+        if (start3 < 0) {
+          start3 = -start3 > length ? 0 : length + start3;
         }
         end = end === undefined$1 || end > length ? length : toInteger(end);
         if (end < 0) {
           end += length;
         }
-        end = start2 > end ? 0 : toLength(end);
-        while (start2 < end) {
-          array[start2++] = value;
+        end = start3 > end ? 0 : toLength(end);
+        while (start3 < end) {
+          array[start3++] = value;
         }
         return array;
       }
@@ -6014,8 +6146,8 @@ var lodash = createCommonjsModule(function(module, exports) {
       function baseHasIn(object, key) {
         return object != null && key in Object2(object);
       }
-      function baseInRange(number, start2, end) {
-        return number >= nativeMin(start2, end) && number < nativeMax(start2, end);
+      function baseInRange(number, start3, end) {
+        return number >= nativeMin(start3, end) && number < nativeMax(start3, end);
       }
       function baseIntersection(arrays, iteratee2, comparator) {
         var includes2 = comparator ? arrayIncludesWith : arrayIncludes, length = arrays[0].length, othLength = arrays.length, othIndex = othLength, caches = Array2(othLength), maxLength = Infinity, result2 = [];
@@ -6373,11 +6505,11 @@ var lodash = createCommonjsModule(function(module, exports) {
       function baseRandom(lower, upper) {
         return lower + nativeFloor(nativeRandom() * (upper - lower + 1));
       }
-      function baseRange(start2, end, step, fromRight) {
-        var index = -1, length = nativeMax(nativeCeil((end - start2) / (step || 1)), 0), result2 = Array2(length);
+      function baseRange(start3, end, step, fromRight) {
+        var index = -1, length = nativeMax(nativeCeil((end - start3) / (step || 1)), 0), result2 = Array2(length);
         while (length--) {
-          result2[fromRight ? length : ++index] = start2;
-          start2 += step;
+          result2[fromRight ? length : ++index] = start3;
+          start3 += step;
         }
         return result2;
       }
@@ -6397,8 +6529,8 @@ var lodash = createCommonjsModule(function(module, exports) {
         } while (n2);
         return result2;
       }
-      function baseRest(func, start2) {
-        return setToString(overRest(func, start2, identity2), func + "");
+      function baseRest(func, start3) {
+        return setToString(overRest(func, start3, identity2), func + "");
       }
       function baseSample(collection) {
         return arraySample(values(collection));
@@ -6445,20 +6577,20 @@ var lodash = createCommonjsModule(function(module, exports) {
       function baseShuffle(collection) {
         return shuffleSelf(values(collection));
       }
-      function baseSlice(array, start2, end) {
+      function baseSlice(array, start3, end) {
         var index = -1, length = array.length;
-        if (start2 < 0) {
-          start2 = -start2 > length ? 0 : length + start2;
+        if (start3 < 0) {
+          start3 = -start3 > length ? 0 : length + start3;
         }
         end = end > length ? length : end;
         if (end < 0) {
           end += length;
         }
-        length = start2 > end ? 0 : end - start2 >>> 0;
-        start2 >>>= 0;
+        length = start3 > end ? 0 : end - start3 >>> 0;
+        start3 >>>= 0;
         var result2 = Array2(length);
         while (++index < length) {
-          result2[index] = array[index + start2];
+          result2[index] = array[index + start3];
         }
         return result2;
       }
@@ -6648,10 +6780,10 @@ var lodash = createCommonjsModule(function(module, exports) {
         return isKey(value, object) ? [value] : stringToPath(toString(value));
       }
       var castRest = baseRest;
-      function castSlice(array, start2, end) {
+      function castSlice(array, start3, end) {
         var length = array.length;
         end = end === undefined$1 ? length : end;
-        return !start2 && end >= length ? array : baseSlice(array, start2, end);
+        return !start3 && end >= length ? array : baseSlice(array, start3, end);
       }
       var clearTimeout = ctxClearTimeout || function(id) {
         return root.clearTimeout(id);
@@ -7047,19 +7179,19 @@ var lodash = createCommonjsModule(function(module, exports) {
         return wrapper;
       }
       function createRange(fromRight) {
-        return function(start2, end, step) {
-          if (step && typeof step != "number" && isIterateeCall(start2, end, step)) {
+        return function(start3, end, step) {
+          if (step && typeof step != "number" && isIterateeCall(start3, end, step)) {
             end = step = undefined$1;
           }
-          start2 = toFinite(start2);
+          start3 = toFinite(start3);
           if (end === undefined$1) {
-            end = start2;
-            start2 = 0;
+            end = start3;
+            start3 = 0;
           } else {
             end = toFinite(end);
           }
-          step = step === undefined$1 ? start2 < end ? 1 : -1 : toFinite(step);
-          return baseRange(start2, end, step, fromRight);
+          step = step === undefined$1 ? start3 < end ? 1 : -1 : toFinite(step);
+          return baseRange(start3, end, step, fromRight);
         };
       }
       function createRelationalOperation(operator) {
@@ -7430,26 +7562,26 @@ var lodash = createCommonjsModule(function(module, exports) {
           return result2;
         };
       }
-      function getView(start2, end, transforms) {
+      function getView(start3, end, transforms) {
         var index = -1, length = transforms.length;
         while (++index < length) {
           var data = transforms[index], size2 = data.size;
           switch (data.type) {
             case "drop":
-              start2 += size2;
+              start3 += size2;
               break;
             case "dropRight":
               end -= size2;
               break;
             case "take":
-              end = nativeMin(end, start2 + size2);
+              end = nativeMin(end, start3 + size2);
               break;
             case "takeRight":
-              start2 = nativeMax(start2, end - size2);
+              start3 = nativeMax(start3, end - size2);
               break;
           }
         }
-        return {start: start2, end};
+        return {start: start3, end};
       }
       function getWrapDetails(source) {
         var match2 = source.match(reWrapDetails);
@@ -7645,19 +7777,19 @@ var lodash = createCommonjsModule(function(module, exports) {
       function objectToString(value) {
         return nativeObjectToString.call(value);
       }
-      function overRest(func, start2, transform2) {
-        start2 = nativeMax(start2 === undefined$1 ? func.length - 1 : start2, 0);
+      function overRest(func, start3, transform2) {
+        start3 = nativeMax(start3 === undefined$1 ? func.length - 1 : start3, 0);
         return function() {
-          var args = arguments, index = -1, length = nativeMax(args.length - start2, 0), array = Array2(length);
+          var args = arguments, index = -1, length = nativeMax(args.length - start3, 0), array = Array2(length);
           while (++index < length) {
-            array[index] = args[start2 + index];
+            array[index] = args[start3 + index];
           }
           index = -1;
-          var otherArgs = Array2(start2 + 1);
-          while (++index < start2) {
+          var otherArgs = Array2(start3 + 1);
+          while (++index < start3) {
             otherArgs[index] = args[index];
           }
-          otherArgs[start2] = transform2(array);
+          otherArgs[start3] = transform2(array);
           return apply(func, this, otherArgs);
         };
       }
@@ -7842,16 +7974,16 @@ var lodash = createCommonjsModule(function(module, exports) {
       function dropWhile(array, predicate) {
         return array && array.length ? baseWhile(array, getIteratee(predicate, 3), true) : [];
       }
-      function fill(array, value, start2, end) {
+      function fill(array, value, start3, end) {
         var length = array == null ? 0 : array.length;
         if (!length) {
           return [];
         }
-        if (start2 && typeof start2 != "number" && isIterateeCall(array, value, start2)) {
-          start2 = 0;
+        if (start3 && typeof start3 != "number" && isIterateeCall(array, value, start3)) {
+          start3 = 0;
           end = length;
         }
-        return baseFill(array, value, start2, end);
+        return baseFill(array, value, start3, end);
       }
       function findIndex(array, predicate, fromIndex) {
         var length = array == null ? 0 : array.length;
@@ -7998,19 +8130,19 @@ var lodash = createCommonjsModule(function(module, exports) {
       function reverse(array) {
         return array == null ? array : nativeReverse.call(array);
       }
-      function slice(array, start2, end) {
+      function slice(array, start3, end) {
         var length = array == null ? 0 : array.length;
         if (!length) {
           return [];
         }
-        if (end && typeof end != "number" && isIterateeCall(array, start2, end)) {
-          start2 = 0;
+        if (end && typeof end != "number" && isIterateeCall(array, start3, end)) {
+          start3 = 0;
           end = length;
         } else {
-          start2 = start2 == null ? 0 : toInteger(start2);
+          start3 = start3 == null ? 0 : toInteger(start3);
           end = end === undefined$1 ? length : toInteger(end);
         }
-        return baseSlice(array, start2, end);
+        return baseSlice(array, start3, end);
       }
       function sortedIndex(array, value) {
         return baseSortedIndex(array, value);
@@ -8171,13 +8303,13 @@ var lodash = createCommonjsModule(function(module, exports) {
         return interceptor(value);
       }
       var wrapperAt = flatRest(function(paths) {
-        var length = paths.length, start2 = length ? paths[0] : 0, value = this.__wrapped__, interceptor = function(object) {
+        var length = paths.length, start3 = length ? paths[0] : 0, value = this.__wrapped__, interceptor = function(object) {
           return baseAt(object, paths);
         };
-        if (length > 1 || this.__actions__.length || !(value instanceof LazyWrapper) || !isIndex(start2)) {
+        if (length > 1 || this.__actions__.length || !(value instanceof LazyWrapper) || !isIndex(start3)) {
           return this.thru(interceptor);
         }
-        value = value.slice(start2, +start2 + (length ? 1 : 0));
+        value = value.slice(start3, +start3 + (length ? 1 : 0));
         value.__actions__.push({
           func: thru,
           args: [interceptor],
@@ -8604,20 +8736,20 @@ var lodash = createCommonjsModule(function(module, exports) {
       var rearg = flatRest(function(func, indexes) {
         return createWrap(func, WRAP_REARG_FLAG, undefined$1, undefined$1, undefined$1, indexes);
       });
-      function rest(func, start2) {
+      function rest(func, start3) {
         if (typeof func != "function") {
           throw new TypeError2(FUNC_ERROR_TEXT);
         }
-        start2 = start2 === undefined$1 ? start2 : toInteger(start2);
-        return baseRest(func, start2);
+        start3 = start3 === undefined$1 ? start3 : toInteger(start3);
+        return baseRest(func, start3);
       }
-      function spread(func, start2) {
+      function spread(func, start3) {
         if (typeof func != "function") {
           throw new TypeError2(FUNC_ERROR_TEXT);
         }
-        start2 = start2 == null ? 0 : nativeMax(toInteger(start2), 0);
+        start3 = start3 == null ? 0 : nativeMax(toInteger(start3), 0);
         return baseRest(function(args) {
-          var array = args[start2], otherArgs = castSlice(args, 0, start2);
+          var array = args[start3], otherArgs = castSlice(args, 0, start3);
           if (array) {
             arrayPush(otherArgs, array);
           }
@@ -8776,7 +8908,7 @@ var lodash = createCommonjsModule(function(module, exports) {
       function isNull(value) {
         return value === null;
       }
-      function isNil(value) {
+      function isNil2(value) {
         return value == null;
       }
       function isNumber2(value) {
@@ -9121,16 +9253,16 @@ var lodash = createCommonjsModule(function(module, exports) {
         }
         return baseClamp(toNumber(number), lower, upper);
       }
-      function inRange(number, start2, end) {
-        start2 = toFinite(start2);
+      function inRange(number, start3, end) {
+        start3 = toFinite(start3);
         if (end === undefined$1) {
-          end = start2;
-          start2 = 0;
+          end = start3;
+          start3 = 0;
         } else {
           end = toFinite(end);
         }
         number = toNumber(number);
-        return baseInRange(number, start2, end);
+        return baseInRange(number, start3, end);
       }
       function random(lower, upper, floating) {
         if (floating && typeof floating != "boolean" && isIterateeCall(lower, upper, floating)) {
@@ -9334,8 +9466,8 @@ var lodash = createCommonjsModule(function(module, exports) {
         if (!string || !(chars = baseToString(chars))) {
           return string;
         }
-        var strSymbols = stringToArray(string), chrSymbols = stringToArray(chars), start2 = charsStartIndex(strSymbols, chrSymbols), end = charsEndIndex(strSymbols, chrSymbols) + 1;
-        return castSlice(strSymbols, start2, end).join("");
+        var strSymbols = stringToArray(string), chrSymbols = stringToArray(chars), start3 = charsStartIndex(strSymbols, chrSymbols), end = charsEndIndex(strSymbols, chrSymbols) + 1;
+        return castSlice(strSymbols, start3, end).join("");
       }
       function trimEnd(string, chars, guard) {
         string = toString(string);
@@ -9356,8 +9488,8 @@ var lodash = createCommonjsModule(function(module, exports) {
         if (!string || !(chars = baseToString(chars))) {
           return string;
         }
-        var strSymbols = stringToArray(string), start2 = charsStartIndex(strSymbols, stringToArray(chars));
-        return castSlice(strSymbols, start2).join("");
+        var strSymbols = stringToArray(string), start3 = charsStartIndex(strSymbols, stringToArray(chars));
+        return castSlice(strSymbols, start3).join("");
       }
       function truncate(string, options) {
         var length = DEFAULT_TRUNC_LENGTH, omission = DEFAULT_TRUNC_OMISSION;
@@ -9840,7 +9972,7 @@ var lodash = createCommonjsModule(function(module, exports) {
       lodash2.isMatchWith = isMatchWith;
       lodash2.isNaN = isNaN2;
       lodash2.isNative = isNative;
-      lodash2.isNil = isNil;
+      lodash2.isNil = isNil2;
       lodash2.isNull = isNull;
       lodash2.isNumber = isNumber2;
       lodash2.isObject = isObject;
@@ -10002,20 +10134,20 @@ var lodash = createCommonjsModule(function(module, exports) {
       LazyWrapper.prototype.reject = function(predicate) {
         return this.filter(negate(getIteratee(predicate)));
       };
-      LazyWrapper.prototype.slice = function(start2, end) {
-        start2 = toInteger(start2);
+      LazyWrapper.prototype.slice = function(start3, end) {
+        start3 = toInteger(start3);
         var result2 = this;
-        if (result2.__filtered__ && (start2 > 0 || end < 0)) {
+        if (result2.__filtered__ && (start3 > 0 || end < 0)) {
           return new LazyWrapper(result2);
         }
-        if (start2 < 0) {
-          result2 = result2.takeRight(-start2);
-        } else if (start2) {
-          result2 = result2.drop(start2);
+        if (start3 < 0) {
+          result2 = result2.takeRight(-start3);
+        } else if (start3) {
+          result2 = result2.drop(start3);
         }
         if (end !== undefined$1) {
           end = toInteger(end);
-          result2 = end < 0 ? result2.dropRight(-end) : result2.take(end - start2);
+          result2 = end < 0 ? result2.dropRight(-end) : result2.take(end - start3);
         }
         return result2;
       };
@@ -10105,6 +10237,7 @@ var lodash = createCommonjsModule(function(module, exports) {
     }
   }).call(commonjsGlobal);
 });
+var isNil = lodash.isNil;
 var round = lodash.round;
 
 // build/_snowpack/pkg/d3-color.js
@@ -10436,7 +10569,8 @@ function hsl2rgb(h, m1, m2) {
 }
 
 // build/dist/timeStores.js
-var now3 = readable(DateTime.now(), function start(set) {
+var import_query_store = __toModule(require_query_store());
+var nowSecond = readable(DateTime.now(), function start(set) {
   const interval = setInterval(() => {
     set(DateTime.now());
   }, 1e3);
@@ -10444,24 +10578,32 @@ var now3 = readable(DateTime.now(), function start(set) {
     clearInterval(interval);
   };
 });
+var now3 = readable(DateTime.now(), function start2(set) {
+  const interval = setInterval(() => {
+    set(DateTime.now());
+  }, 5e3);
+  return function stop() {
+    clearInterval(interval);
+  };
+});
 var zones = writable([
-  "US/Eastern",
-  "US/Central",
-  "US/Mountain",
-  "US/Pacific",
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
   "Europe/London",
   "Japan",
   "UTC"
-]);
+].map((tz) => DateTime.now().setZone(tz).zoneName));
+var localTimeZone = derived(import_query_store.default, ($query) => $query.tz ?? DateTime.now().toLocal().zoneName);
 var nowMinute = derived(now3, ($now) => $now.startOf("minute"));
 var nowHour = derived(nowMinute, ($nowMinute) => $nowMinute.startOf("hour"));
-var localDayStart = derived(nowHour, ($nowHour) => $nowHour.startOf("day"));
-var localTimeZone = derived(nowHour, ($nowHour) => $nowHour.toLocal().zoneName);
+var localDayStart = derived([nowHour, localTimeZone], ([$nowHour, $localTimeZone]) => $nowHour.setZone($localTimeZone).startOf("day"));
 var MINUTES_PER_DAY = 24 * 60;
-var barStartHour = writable(6);
-var barEndHour = writable(12 + 8);
-var dayFraction = derived([nowMinute, localDayStart, barStartHour, barEndHour], ([$nowMinute, $localDayStart, $barStartHour, $barEndHour]) => {
-  const barStartTime = $localDayStart.plus({hours: $barStartHour}).toLocal();
+var barStartHour = derived(import_query_store.default, ($query) => Number($query.start ?? 7));
+var barEndHour = derived(import_query_store.default, ($query) => Number($query.end ?? 19));
+var dayFraction = derived([nowMinute, localDayStart, barStartHour, barEndHour, localTimeZone], ([$nowMinute, $localDayStart, $barStartHour, $barEndHour, $localTimeZone]) => {
+  const barStartTime = $localDayStart.plus({hours: $barStartHour}).setZone($localTimeZone);
   const barTotalMinutes = ($barEndHour - $barStartHour) * 60;
   const {minutes} = $nowMinute.diff(barStartTime, "minutes");
   const ratio = Math.round(minutes) / barTotalMinutes;
@@ -10503,17 +10645,11 @@ var hourGradient = (localDayStart2, zone, backgroundColor, hours2) => {
   const colors2 = hours2.map((hour, i) => {
     const zoneHour = localDayStart2.plus({hours: hour}).setZone(zone).hour;
     const color2 = baseColor.darker(hourDarkness(zoneHour));
-    const start2 = round(100 * i / length);
+    const start3 = round(100 * i / length);
     const end = round(100 * (i + 1) / length);
-    if (i == 0) {
-      return `${color2} ${end}%`;
-    } else if (i + 1 == length) {
-      return `${color2} ${start2}%`;
-    } else {
-      return `${color2} ${start2}% ${end}%`;
-    }
+    return `linear-gradient(to right, transparent ${start3}%, ${color2} ${start3}% ${end}%, transparent ${end}%)`;
   });
-  return `linear-gradient(to right, ${colors2.join(", ")})`;
+  return colors2.join(",\n");
 };
 var cursorPosition = writable({
   active: false,
@@ -10522,8 +10658,523 @@ var cursorPosition = writable({
   time: DateTime.now()
 });
 
-// build/dist/ZonedTimeDisplay.svelte.js
+// build/dist/ConfigPanel.svelte.js
+var import_query_store2 = __toModule(require_query_store());
+function get_each_context(ctx, list, i) {
+  const child_ctx = ctx.slice();
+  child_ctx[11] = list[i];
+  return child_ctx;
+}
+function create_each_block(ctx) {
+  let option;
+  let t_value = ctx[11] + "";
+  let t;
+  let option_value_value;
+  let option_selected_value;
+  return {
+    c() {
+      option = element("option");
+      t = text(t_value);
+      option.__value = option_value_value = ctx[11];
+      option.value = option.__value;
+      option.selected = option_selected_value = ctx[11] == ctx[2];
+    },
+    m(target, anchor) {
+      insert(target, option, anchor);
+      append(option, t);
+    },
+    p(ctx2, dirty) {
+      if (dirty & 2 && t_value !== (t_value = ctx2[11] + ""))
+        set_data(t, t_value);
+      if (dirty & 2 && option_value_value !== (option_value_value = ctx2[11])) {
+        option.__value = option_value_value;
+        option.value = option.__value;
+      }
+      if (dirty & 6 && option_selected_value !== (option_selected_value = ctx2[11] == ctx2[2])) {
+        option.selected = option_selected_value;
+      }
+    },
+    d(detaching) {
+      if (detaching)
+        detach(option);
+    }
+  };
+}
 function create_fragment(ctx) {
+  let h1;
+  let t1;
+  let div;
+  let label0;
+  let t3;
+  let select;
+  let t4;
+  let label1;
+  let t6;
+  let input0;
+  let input0_placeholder_value;
+  let t7;
+  let label2;
+  let t9;
+  let input1;
+  let input1_min_value;
+  let input1_placeholder_value;
+  let t10;
+  let button;
+  let mounted;
+  let dispose;
+  let each_value = ctx[1];
+  let each_blocks = [];
+  for (let i = 0; i < each_value.length; i += 1) {
+    each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+  }
+  return {
+    c() {
+      h1 = element("h1");
+      h1.textContent = "config";
+      t1 = space();
+      div = element("div");
+      label0 = element("label");
+      label0.textContent = "local time zone";
+      t3 = space();
+      select = element("select");
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        each_blocks[i].c();
+      }
+      t4 = space();
+      label1 = element("label");
+      label1.textContent = "start hour";
+      t6 = space();
+      input0 = element("input");
+      t7 = space();
+      label2 = element("label");
+      label2.textContent = "end hour";
+      t9 = space();
+      input1 = element("input");
+      t10 = space();
+      button = element("button");
+      button.textContent = "reset to defaults";
+      attr(label0, "for", "localTimeZone");
+      attr(label0, "class", "svelte-1w0tq5j");
+      attr(select, "id", "localTimeZone");
+      attr(select, "class", "svelte-1w0tq5j");
+      if (ctx[0].tz === void 0)
+        add_render_callback(() => ctx[5].call(select));
+      attr(label1, "for", "barStartHour");
+      attr(label1, "class", "svelte-1w0tq5j");
+      attr(input0, "id", "barStartHour");
+      attr(input0, "type", "number");
+      attr(input0, "placeholder", input0_placeholder_value = String(ctx[3]));
+      attr(input0, "class", "svelte-1w0tq5j");
+      attr(label2, "for", "barEndHour");
+      attr(label2, "class", "svelte-1w0tq5j");
+      attr(input1, "id", "barEndHour");
+      attr(input1, "type", "number");
+      attr(input1, "min", input1_min_value = String(ctx[0].start ?? ctx[3]));
+      attr(input1, "placeholder", input1_placeholder_value = String(ctx[4]));
+      attr(input1, "class", "svelte-1w0tq5j");
+      attr(div, "class", "config svelte-1w0tq5j");
+      attr(button, "class", "svelte-1w0tq5j");
+    },
+    m(target, anchor) {
+      insert(target, h1, anchor);
+      insert(target, t1, anchor);
+      insert(target, div, anchor);
+      append(div, label0);
+      append(div, t3);
+      append(div, select);
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        each_blocks[i].m(select, null);
+      }
+      select_option(select, ctx[0].tz);
+      append(div, t4);
+      append(div, label1);
+      append(div, t6);
+      append(div, input0);
+      set_input_value(input0, ctx[0].start);
+      append(div, t7);
+      append(div, label2);
+      append(div, t9);
+      append(div, input1);
+      set_input_value(input1, ctx[0].end);
+      insert(target, t10, anchor);
+      insert(target, button, anchor);
+      if (!mounted) {
+        dispose = [
+          listen(select, "change", ctx[5]),
+          listen(input0, "input", ctx[6]),
+          listen(input0, "focus", ctx[7]),
+          listen(input1, "input", ctx[8]),
+          listen(input1, "focus", ctx[9]),
+          listen(button, "click", ctx[10])
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, [dirty]) {
+      if (dirty & 6) {
+        each_value = ctx2[1];
+        let i;
+        for (i = 0; i < each_value.length; i += 1) {
+          const child_ctx = get_each_context(ctx2, each_value, i);
+          if (each_blocks[i]) {
+            each_blocks[i].p(child_ctx, dirty);
+          } else {
+            each_blocks[i] = create_each_block(child_ctx);
+            each_blocks[i].c();
+            each_blocks[i].m(select, null);
+          }
+        }
+        for (; i < each_blocks.length; i += 1) {
+          each_blocks[i].d(1);
+        }
+        each_blocks.length = each_value.length;
+      }
+      if (dirty & 3) {
+        select_option(select, ctx2[0].tz);
+      }
+      if (dirty & 8 && input0_placeholder_value !== (input0_placeholder_value = String(ctx2[3]))) {
+        attr(input0, "placeholder", input0_placeholder_value);
+      }
+      if (dirty & 3 && to_number(input0.value) !== ctx2[0].start) {
+        set_input_value(input0, ctx2[0].start);
+      }
+      if (dirty & 11 && input1_min_value !== (input1_min_value = String(ctx2[0].start ?? ctx2[3]))) {
+        attr(input1, "min", input1_min_value);
+      }
+      if (dirty & 16 && input1_placeholder_value !== (input1_placeholder_value = String(ctx2[4]))) {
+        attr(input1, "placeholder", input1_placeholder_value);
+      }
+      if (dirty & 3 && to_number(input1.value) !== ctx2[0].end) {
+        set_input_value(input1, ctx2[0].end);
+      }
+    },
+    i: noop,
+    o: noop,
+    d(detaching) {
+      if (detaching)
+        detach(h1);
+      if (detaching)
+        detach(t1);
+      if (detaching)
+        detach(div);
+      destroy_each(each_blocks, detaching);
+      if (detaching)
+        detach(t10);
+      if (detaching)
+        detach(button);
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function instance($$self, $$props, $$invalidate) {
+  let $query;
+  let $zones;
+  let $localTimeZone;
+  let $barStartHour;
+  let $barEndHour;
+  component_subscribe($$self, import_query_store2.default, ($$value) => $$invalidate(0, $query = $$value));
+  component_subscribe($$self, zones, ($$value) => $$invalidate(1, $zones = $$value));
+  component_subscribe($$self, localTimeZone, ($$value) => $$invalidate(2, $localTimeZone = $$value));
+  component_subscribe($$self, barStartHour, ($$value) => $$invalidate(3, $barStartHour = $$value));
+  component_subscribe($$self, barEndHour, ($$value) => $$invalidate(4, $barEndHour = $$value));
+  function select_change_handler() {
+    $query.tz = select_value(this);
+    import_query_store2.default.set($query);
+  }
+  function input0_input_handler() {
+    $query.start = to_number(this.value);
+    import_query_store2.default.set($query);
+  }
+  const focus_handler = () => {
+    if (isNil($query.start)) {
+      set_store_value(import_query_store2.default, $query.start = String($barStartHour), $query);
+    }
+  };
+  function input1_input_handler() {
+    $query.end = to_number(this.value);
+    import_query_store2.default.set($query);
+  }
+  const focus_handler_1 = () => {
+    if (isNil($query.end)) {
+      set_store_value(import_query_store2.default, $query.end = String($barEndHour), $query);
+    }
+  };
+  const click_handler = () => set_store_value(import_query_store2.default, $query = {}, $query);
+  return [
+    $query,
+    $zones,
+    $localTimeZone,
+    $barStartHour,
+    $barEndHour,
+    select_change_handler,
+    input0_input_handler,
+    focus_handler,
+    input1_input_handler,
+    focus_handler_1,
+    click_handler
+  ];
+}
+var ConfigPanel = class extends SvelteComponent {
+  constructor(options) {
+    super();
+    init(this, options, instance, create_fragment, safe_not_equal, {});
+  }
+};
+var ConfigPanel_svelte_default = ConfigPanel;
+
+// build/dist/Reference.svelte.js
+function create_fragment2(ctx) {
+  let div;
+  return {
+    c() {
+      div = element("div");
+      div.innerHTML = `<h2>helpful reference information</h2> 
+  <ul><li><a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">List of tz database time zones</a></li></ul>`;
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+    },
+    p: noop,
+    i: noop,
+    o: noop,
+    d(detaching) {
+      if (detaching)
+        detach(div);
+    }
+  };
+}
+var Reference = class extends SvelteComponent {
+  constructor(options) {
+    super();
+    init(this, options, null, create_fragment2, safe_not_equal, {});
+  }
+};
+var Reference_svelte_default = Reference;
+
+// build/dist/TimeTitle.svelte.js
+function create_fragment3(ctx) {
+  let h1;
+  let t0;
+  let t1;
+  let t2;
+  let t3;
+  return {
+    c() {
+      h1 = element("h1");
+      t0 = text("It is ");
+      t1 = text(ctx[1]);
+      t2 = text(" in ");
+      t3 = text(ctx[0]);
+    },
+    m(target, anchor) {
+      insert(target, h1, anchor);
+      append(h1, t0);
+      append(h1, t1);
+      append(h1, t2);
+      append(h1, t3);
+    },
+    p(ctx2, [dirty]) {
+      if (dirty & 2)
+        set_data(t1, ctx2[1]);
+      if (dirty & 1)
+        set_data(t3, ctx2[0]);
+    },
+    i: noop,
+    o: noop,
+    d(detaching) {
+      if (detaching)
+        detach(h1);
+    }
+  };
+}
+function instance2($$self, $$props, $$invalidate) {
+  let timeStr;
+  let $nowSecond;
+  let $localTimeZone;
+  component_subscribe($$self, nowSecond, ($$value) => $$invalidate(2, $nowSecond = $$value));
+  component_subscribe($$self, localTimeZone, ($$value) => $$invalidate(0, $localTimeZone = $$value));
+  $$self.$$.update = () => {
+    if ($$self.$$.dirty & 5) {
+      $:
+        $$invalidate(1, timeStr = $nowSecond.setZone($localTimeZone).toLocaleString(DateTime.TIME_WITH_SECONDS));
+    }
+  };
+  return [$localTimeZone, timeStr, $nowSecond];
+}
+var TimeTitle = class extends SvelteComponent {
+  constructor(options) {
+    super();
+    init(this, options, instance2, create_fragment3, safe_not_equal, {});
+  }
+};
+var TimeTitle_svelte_default = TimeTitle;
+
+// build/_snowpack/pkg/svelte/transition.js
+function fade(node, {delay = 0, duration = 400, easing = identity} = {}) {
+  const o = +getComputedStyle(node).opacity;
+  return {
+    delay,
+    duration,
+    easing,
+    css: (t) => `opacity: ${t * o}`
+  };
+}
+
+// build/dist/Position.svelte.js
+var get_align_center_slot_changes = (dirty) => ({ratio: dirty & 1});
+var get_align_center_slot_context = (ctx) => ({ratio: ctx[0]});
+var get_default_slot_changes = (dirty) => ({ratio: dirty & 1});
+var get_default_slot_context = (ctx) => ({ratio: ctx[0]});
+function create_if_block(ctx) {
+  let div;
+  let current;
+  const align_center_slot_template = ctx[4].align_center;
+  const align_center_slot = create_slot(align_center_slot_template, ctx, ctx[3], get_align_center_slot_context);
+  return {
+    c() {
+      div = element("div");
+      if (align_center_slot)
+        align_center_slot.c();
+      attr(div, "class", "inner svelte-jpw9dr");
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+      if (align_center_slot) {
+        align_center_slot.m(div, null);
+      }
+      current = true;
+    },
+    p(ctx2, dirty) {
+      if (align_center_slot) {
+        if (align_center_slot.p && (!current || dirty & 9)) {
+          update_slot(align_center_slot, align_center_slot_template, ctx2, ctx2[3], dirty, get_align_center_slot_changes, get_align_center_slot_context);
+        }
+      }
+    },
+    i(local) {
+      if (current)
+        return;
+      transition_in(align_center_slot, local);
+      current = true;
+    },
+    o(local) {
+      transition_out(align_center_slot, local);
+      current = false;
+    },
+    d(detaching) {
+      if (detaching)
+        detach(div);
+      if (align_center_slot)
+        align_center_slot.d(detaching);
+    }
+  };
+}
+function create_fragment4(ctx) {
+  let div;
+  let t;
+  let div_style_value;
+  let current;
+  const default_slot_template = ctx[4].default;
+  const default_slot = create_slot(default_slot_template, ctx, ctx[3], get_default_slot_context);
+  let if_block = ctx[2].align_center && create_if_block(ctx);
+  return {
+    c() {
+      div = element("div");
+      if (default_slot)
+        default_slot.c();
+      t = space();
+      if (if_block)
+        if_block.c();
+      attr(div, "class", "position svelte-jpw9dr");
+      attr(div, "style", div_style_value = "--ratio: " + ctx[0] + "; " + ctx[1]);
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+      if (default_slot) {
+        default_slot.m(div, null);
+      }
+      append(div, t);
+      if (if_block)
+        if_block.m(div, null);
+      current = true;
+    },
+    p(ctx2, [dirty]) {
+      if (default_slot) {
+        if (default_slot.p && (!current || dirty & 9)) {
+          update_slot(default_slot, default_slot_template, ctx2, ctx2[3], dirty, get_default_slot_changes, get_default_slot_context);
+        }
+      }
+      if (ctx2[2].align_center) {
+        if (if_block) {
+          if_block.p(ctx2, dirty);
+          if (dirty & 4) {
+            transition_in(if_block, 1);
+          }
+        } else {
+          if_block = create_if_block(ctx2);
+          if_block.c();
+          transition_in(if_block, 1);
+          if_block.m(div, null);
+        }
+      } else if (if_block) {
+        group_outros();
+        transition_out(if_block, 1, 1, () => {
+          if_block = null;
+        });
+        check_outros();
+      }
+      if (!current || dirty & 3 && div_style_value !== (div_style_value = "--ratio: " + ctx2[0] + "; " + ctx2[1])) {
+        attr(div, "style", div_style_value);
+      }
+    },
+    i(local) {
+      if (current)
+        return;
+      transition_in(default_slot, local);
+      transition_in(if_block);
+      current = true;
+    },
+    o(local) {
+      transition_out(default_slot, local);
+      transition_out(if_block);
+      current = false;
+    },
+    d(detaching) {
+      if (detaching)
+        detach(div);
+      if (default_slot)
+        default_slot.d(detaching);
+      if (if_block)
+        if_block.d();
+    }
+  };
+}
+function instance3($$self, $$props, $$invalidate) {
+  let {$$slots: slots = {}, $$scope} = $$props;
+  const $$slots = compute_slots(slots);
+  let {ratio} = $$props;
+  let {style = ""} = $$props;
+  $$self.$$set = ($$props2) => {
+    if ("ratio" in $$props2)
+      $$invalidate(0, ratio = $$props2.ratio);
+    if ("style" in $$props2)
+      $$invalidate(1, style = $$props2.style);
+    if ("$$scope" in $$props2)
+      $$invalidate(3, $$scope = $$props2.$$scope);
+  };
+  return [ratio, style, $$slots, $$scope, slots];
+}
+var Position = class extends SvelteComponent {
+  constructor(options) {
+    super();
+    init(this, options, instance3, create_fragment4, safe_not_equal, {ratio: 0, style: 1});
+  }
+};
+var Position_svelte_default = Position;
+
+// build/dist/ZonedTimeDisplay.svelte.js
+function create_fragment5(ctx) {
   let div;
   let t;
   return {
@@ -10548,7 +11199,7 @@ function create_fragment(ctx) {
     }
   };
 }
-function instance($$self, $$props, $$invalidate) {
+function instance4($$self, $$props, $$invalidate) {
   let timeStr;
   let $localTimeZone;
   let $nowMinute;
@@ -10574,170 +11225,598 @@ function instance($$self, $$props, $$invalidate) {
 var ZonedTimeDisplay = class extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance, create_fragment, safe_not_equal, {zone: 1, timeFormat: 2});
+    init(this, options, instance4, create_fragment5, safe_not_equal, {zone: 1, timeFormat: 2});
   }
 };
 var ZonedTimeDisplay_svelte_default = ZonedTimeDisplay;
 
-// build/_snowpack/pkg/svelte/transition.js
-function fade(node, {delay = 0, duration = 400, easing = identity} = {}) {
-  const o = +getComputedStyle(node).opacity;
-  return {
-    delay,
-    duration,
-    easing,
-    css: (t) => `opacity: ${t * o}`
-  };
+// build/dist/TimeCursor.svelte.js
+function get_each_context2(ctx, list, i) {
+  const child_ctx = ctx.slice();
+  child_ctx[8] = list[i];
+  child_ctx[10] = i;
+  return child_ctx;
 }
-
-// build/dist/ZoneHours.svelte.js
-function create_if_block(ctx) {
-  let div0;
-  let div0_transition;
-  let t;
-  let div1;
-  let zonedtimedisplay;
-  let div1_transition;
+function create_default_slot(ctx) {
+  let div;
+  let div_transition;
   let current;
-  zonedtimedisplay = new ZonedTimeDisplay_svelte_default({
-    props: {
-      zone: ctx[0],
-      time: ctx[3].time
-    }
-  });
   return {
     c() {
-      div0 = element("div");
-      t = space();
-      div1 = element("div");
-      create_component(zonedtimedisplay.$$.fragment);
-      attr(div0, "class", "position cursor mouse svelte-13jfrf0");
-      set_style(div0, "--dayFraction", ctx[3].ratio);
-      attr(div1, "class", "position mouse time svelte-13jfrf0");
-      set_style(div1, "--dayFraction", ctx[3].ratio);
+      div = element("div");
+      attr(div, "class", "cursor svelte-1xa064o");
+      attr(div, "style", ctx[2]);
     },
     m(target, anchor) {
-      insert(target, div0, anchor);
-      insert(target, t, anchor);
-      insert(target, div1, anchor);
-      mount_component(zonedtimedisplay, div1, null);
+      insert(target, div, anchor);
       current = true;
     },
     p(ctx2, dirty) {
-      if (!current || dirty & 8) {
-        set_style(div0, "--dayFraction", ctx2[3].ratio);
-      }
-      const zonedtimedisplay_changes = {};
-      if (dirty & 1)
-        zonedtimedisplay_changes.zone = ctx2[0];
-      if (dirty & 8)
-        zonedtimedisplay_changes.time = ctx2[3].time;
-      zonedtimedisplay.$set(zonedtimedisplay_changes);
-      if (!current || dirty & 8) {
-        set_style(div1, "--dayFraction", ctx2[3].ratio);
+      if (!current || dirty & 4) {
+        attr(div, "style", ctx2[2]);
       }
     },
     i(local) {
       if (current)
         return;
       add_render_callback(() => {
-        if (!div0_transition)
-          div0_transition = create_bidirectional_transition(div0, fade, {}, true);
-        div0_transition.run(1);
-      });
-      transition_in(zonedtimedisplay.$$.fragment, local);
-      add_render_callback(() => {
-        if (!div1_transition)
-          div1_transition = create_bidirectional_transition(div1, fade, {}, true);
-        div1_transition.run(1);
+        if (!div_transition)
+          div_transition = create_bidirectional_transition(div, fade, {}, true);
+        div_transition.run(1);
       });
       current = true;
     },
     o(local) {
-      if (!div0_transition)
-        div0_transition = create_bidirectional_transition(div0, fade, {}, false);
-      div0_transition.run(0);
-      transition_out(zonedtimedisplay.$$.fragment, local);
-      if (!div1_transition)
-        div1_transition = create_bidirectional_transition(div1, fade, {}, false);
-      div1_transition.run(0);
+      if (!div_transition)
+        div_transition = create_bidirectional_transition(div, fade, {}, false);
+      div_transition.run(0);
       current = false;
     },
     d(detaching) {
       if (detaching)
-        detach(div0);
-      if (detaching && div0_transition)
-        div0_transition.end();
-      if (detaching)
-        detach(t);
-      if (detaching)
-        detach(div1);
-      destroy_component(zonedtimedisplay);
-      if (detaching && div1_transition)
-        div1_transition.end();
+        detach(div);
+      if (detaching && div_transition)
+        div_transition.end();
     }
   };
 }
-function create_fragment2(ctx) {
-  let div2;
-  let div0;
+function create_align_center_slot(ctx) {
+  let div;
   let zonedtimedisplay;
-  let t0;
-  let div1;
-  let t1;
+  let t;
+  let div_transition;
   let current;
-  zonedtimedisplay = new ZonedTimeDisplay_svelte_default({props: {zone: ctx[0]}});
-  let if_block = ctx[3].active && create_if_block(ctx);
+  zonedtimedisplay = new ZonedTimeDisplay_svelte_default({
+    props: {
+      zone: ctx[8],
+      time: ctx[1]
+    }
+  });
   return {
     c() {
-      div2 = element("div");
-      div0 = element("div");
+      div = element("div");
       create_component(zonedtimedisplay.$$.fragment);
-      t0 = space();
-      div1 = element("div");
-      t1 = space();
-      if (if_block)
-        if_block.c();
-      attr(div0, "class", "position current time svelte-13jfrf0");
-      set_style(div0, "--dayFraction", ctx[2]);
-      attr(div1, "class", "position cursor current svelte-13jfrf0");
-      set_style(div1, "--dayFraction", ctx[2]);
-      attr(div2, "class", "gradient svelte-13jfrf0");
-      attr(div2, "style", ctx[1]);
+      t = space();
+      attr(div, "class", "time svelte-1xa064o");
+      attr(div, "style", ctx[2]);
+      attr(div, "slot", "align_center");
     },
     m(target, anchor) {
-      insert(target, div2, anchor);
-      append(div2, div0);
-      mount_component(zonedtimedisplay, div0, null);
-      append(div2, t0);
-      append(div2, div1);
-      append(div2, t1);
-      if (if_block)
-        if_block.m(div2, null);
+      insert(target, div, anchor);
+      mount_component(zonedtimedisplay, div, null);
+      append(div, t);
+      current = true;
+    },
+    p(ctx2, dirty) {
+      const zonedtimedisplay_changes = {};
+      if (dirty & 32)
+        zonedtimedisplay_changes.zone = ctx2[8];
+      if (dirty & 2)
+        zonedtimedisplay_changes.time = ctx2[1];
+      zonedtimedisplay.$set(zonedtimedisplay_changes);
+      if (!current || dirty & 4) {
+        attr(div, "style", ctx2[2]);
+      }
+    },
+    i(local) {
+      if (current)
+        return;
+      transition_in(zonedtimedisplay.$$.fragment, local);
+      add_render_callback(() => {
+        if (!div_transition)
+          div_transition = create_bidirectional_transition(div, fade, {}, true);
+        div_transition.run(1);
+      });
+      current = true;
+    },
+    o(local) {
+      transition_out(zonedtimedisplay.$$.fragment, local);
+      if (!div_transition)
+        div_transition = create_bidirectional_transition(div, fade, {}, false);
+      div_transition.run(0);
+      current = false;
+    },
+    d(detaching) {
+      if (detaching)
+        detach(div);
+      destroy_component(zonedtimedisplay);
+      if (detaching && div_transition)
+        div_transition.end();
+    }
+  };
+}
+function create_each_block2(key_1, ctx) {
+  let first;
+  let position;
+  let current;
+  position = new Position_svelte_default({
+    props: {
+      ratio: ctx[0],
+      style: ctx[4](ctx[10]),
+      $$slots: {align_center: [create_align_center_slot]},
+      $$scope: {ctx}
+    }
+  });
+  return {
+    key: key_1,
+    first: null,
+    c() {
+      first = empty();
+      create_component(position.$$.fragment);
+      this.first = first;
+    },
+    m(target, anchor) {
+      insert(target, first, anchor);
+      mount_component(position, target, anchor);
+      current = true;
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+      const position_changes = {};
+      if (dirty & 1)
+        position_changes.ratio = ctx[0];
+      if (dirty & 48)
+        position_changes.style = ctx[4](ctx[10]);
+      if (dirty & 2086) {
+        position_changes.$$scope = {dirty, ctx};
+      }
+      position.$set(position_changes);
+    },
+    i(local) {
+      if (current)
+        return;
+      transition_in(position.$$.fragment, local);
+      current = true;
+    },
+    o(local) {
+      transition_out(position.$$.fragment, local);
+      current = false;
+    },
+    d(detaching) {
+      if (detaching)
+        detach(first);
+      destroy_component(position, detaching);
+    }
+  };
+}
+function create_fragment6(ctx) {
+  let position;
+  let t;
+  let each_blocks = [];
+  let each_1_lookup = new Map();
+  let each_1_anchor;
+  let current;
+  position = new Position_svelte_default({
+    props: {
+      ratio: ctx[0],
+      style: ctx[3],
+      $$slots: {default: [create_default_slot]},
+      $$scope: {ctx}
+    }
+  });
+  let each_value = ctx[5];
+  const get_key = (ctx2) => ctx2[8];
+  for (let i = 0; i < each_value.length; i += 1) {
+    let child_ctx = get_each_context2(ctx, each_value, i);
+    let key = get_key(child_ctx);
+    each_1_lookup.set(key, each_blocks[i] = create_each_block2(key, child_ctx));
+  }
+  return {
+    c() {
+      create_component(position.$$.fragment);
+      t = space();
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        each_blocks[i].c();
+      }
+      each_1_anchor = empty();
+    },
+    m(target, anchor) {
+      mount_component(position, target, anchor);
+      insert(target, t, anchor);
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        each_blocks[i].m(target, anchor);
+      }
+      insert(target, each_1_anchor, anchor);
       current = true;
     },
     p(ctx2, [dirty]) {
-      const zonedtimedisplay_changes = {};
+      const position_changes = {};
       if (dirty & 1)
-        zonedtimedisplay_changes.zone = ctx2[0];
-      zonedtimedisplay.$set(zonedtimedisplay_changes);
-      if (!current || dirty & 4) {
-        set_style(div0, "--dayFraction", ctx2[2]);
+        position_changes.ratio = ctx2[0];
+      if (dirty & 8)
+        position_changes.style = ctx2[3];
+      if (dirty & 2052) {
+        position_changes.$$scope = {dirty, ctx: ctx2};
       }
-      if (!current || dirty & 4) {
-        set_style(div1, "--dayFraction", ctx2[2]);
+      position.$set(position_changes);
+      if (dirty & 55) {
+        each_value = ctx2[5];
+        group_outros();
+        each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx2, each_value, each_1_lookup, each_1_anchor.parentNode, outro_and_destroy_block, create_each_block2, each_1_anchor, get_each_context2);
+        check_outros();
       }
-      if (ctx2[3].active) {
+    },
+    i(local) {
+      if (current)
+        return;
+      transition_in(position.$$.fragment, local);
+      for (let i = 0; i < each_value.length; i += 1) {
+        transition_in(each_blocks[i]);
+      }
+      current = true;
+    },
+    o(local) {
+      transition_out(position.$$.fragment, local);
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        transition_out(each_blocks[i]);
+      }
+      current = false;
+    },
+    d(detaching) {
+      destroy_component(position, detaching);
+      if (detaching)
+        detach(t);
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        each_blocks[i].d(detaching);
+      }
+      if (detaching)
+        detach(each_1_anchor);
+    }
+  };
+}
+function instance5($$self, $$props, $$invalidate) {
+  let colors2;
+  let cursorStyle;
+  let rowStyle;
+  let $zones;
+  component_subscribe($$self, zones, ($$value) => $$invalidate(5, $zones = $$value));
+  let {ratio} = $$props;
+  let {time} = $$props;
+  let {backgroundColor = "#444"} = $$props;
+  let {color: color2 = "#fff"} = $$props;
+  $$self.$$set = ($$props2) => {
+    if ("ratio" in $$props2)
+      $$invalidate(0, ratio = $$props2.ratio);
+    if ("time" in $$props2)
+      $$invalidate(1, time = $$props2.time);
+    if ("backgroundColor" in $$props2)
+      $$invalidate(6, backgroundColor = $$props2.backgroundColor);
+    if ("color" in $$props2)
+      $$invalidate(7, color2 = $$props2.color);
+  };
+  $$self.$$.update = () => {
+    if ($$self.$$.dirty & 192) {
+      $:
+        $$invalidate(2, colors2 = `
+  background-color: ${backgroundColor};
+  color: ${color2};
+  `);
+    }
+  };
+  $:
+    $$invalidate(3, cursorStyle = `
+  grid-column-start: 2;
+  grid-column-end: span 1;
+  height: 100%;
+`);
+  $:
+    $$invalidate(4, rowStyle = (i) => `
+    grid-row-start: ${i + 1};
+    grid-row-end: span 1;
+    grid-column-start: 2;
+    grid-column-end: span 1;
+    height: 100%;
+  `);
+  return [ratio, time, colors2, cursorStyle, rowStyle, $zones, backgroundColor, color2];
+}
+var TimeCursor = class extends SvelteComponent {
+  constructor(options) {
+    super();
+    init(this, options, instance5, create_fragment6, safe_not_equal, {
+      ratio: 0,
+      time: 1,
+      backgroundColor: 6,
+      color: 7
+    });
+  }
+};
+var TimeCursor_svelte_default = TimeCursor;
+
+// build/dist/CurrentTimeCursor.svelte.js
+function create_fragment7(ctx) {
+  let timecursor;
+  let current;
+  timecursor = new TimeCursor_svelte_default({
+    props: {
+      ratio: ctx[0],
+      time: ctx[1],
+      backgroundColor: "#444",
+      color: "white"
+    }
+  });
+  return {
+    c() {
+      create_component(timecursor.$$.fragment);
+    },
+    m(target, anchor) {
+      mount_component(timecursor, target, anchor);
+      current = true;
+    },
+    p(ctx2, [dirty]) {
+      const timecursor_changes = {};
+      if (dirty & 1)
+        timecursor_changes.ratio = ctx2[0];
+      if (dirty & 2)
+        timecursor_changes.time = ctx2[1];
+      timecursor.$set(timecursor_changes);
+    },
+    i(local) {
+      if (current)
+        return;
+      transition_in(timecursor.$$.fragment, local);
+      current = true;
+    },
+    o(local) {
+      transition_out(timecursor.$$.fragment, local);
+      current = false;
+    },
+    d(detaching) {
+      destroy_component(timecursor, detaching);
+    }
+  };
+}
+function instance6($$self, $$props, $$invalidate) {
+  let $dayFraction;
+  let $nowMinute;
+  component_subscribe($$self, dayFraction, ($$value) => $$invalidate(0, $dayFraction = $$value));
+  component_subscribe($$self, nowMinute, ($$value) => $$invalidate(1, $nowMinute = $$value));
+  return [$dayFraction, $nowMinute];
+}
+var CurrentTimeCursor = class extends SvelteComponent {
+  constructor(options) {
+    super();
+    init(this, options, instance6, create_fragment7, safe_not_equal, {});
+  }
+};
+var CurrentTimeCursor_svelte_default = CurrentTimeCursor;
+
+// build/dist/MouseListener.svelte.js
+function create_fragment8(ctx) {
+  let div;
+  let div_resize_listener;
+  let mounted;
+  let dispose;
+  return {
+    c() {
+      div = element("div");
+      attr(div, "class", "area svelte-1vnfpt8");
+      add_render_callback(() => ctx[13].call(div));
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+      div_resize_listener = add_resize_listener(div, ctx[13].bind(div));
+      ctx[14](div);
+      if (!mounted) {
+        dispose = [
+          listen(window, "click", ctx[12]),
+          listen(div, "mouseenter", self2(ctx[15])),
+          listen(div, "mouseleave", self2(ctx[16])),
+          listen(div, "mousemove", self2(ctx[17])),
+          listen(div, "click", self2(ctx[18])),
+          listen(div, "pointermove", self2(ctx[19]))
+        ];
+        mounted = true;
+      }
+    },
+    p: noop,
+    i: noop,
+    o: noop,
+    d(detaching) {
+      if (detaching)
+        detach(div);
+      div_resize_listener();
+      ctx[14](null);
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function instance7($$self, $$props, $$invalidate) {
+  let ratio;
+  let barStartTime;
+  let barTotalMinutes;
+  let time;
+  let $xCoord;
+  let $localDayStart;
+  let $barStartHour;
+  let $barEndHour;
+  let $cursorPosition;
+  component_subscribe($$self, localDayStart, ($$value) => $$invalidate(7, $localDayStart = $$value));
+  component_subscribe($$self, barStartHour, ($$value) => $$invalidate(8, $barStartHour = $$value));
+  component_subscribe($$self, barEndHour, ($$value) => $$invalidate(10, $barEndHour = $$value));
+  component_subscribe($$self, cursorPosition, ($$value) => $$invalidate(20, $cursorPosition = $$value));
+  let xCoord = writable(0);
+  component_subscribe($$self, xCoord, (value) => $$invalidate(2, $xCoord = value));
+  let mouseActive = false;
+  let clientWidth;
+  let inst;
+  const click_handler = (e) => {
+    if (e.target !== inst && mouseActive) {
+      $$invalidate(0, mouseActive = false);
+    }
+  };
+  function div_elementresize_handler() {
+    clientWidth = this.clientWidth;
+    $$invalidate(1, clientWidth);
+  }
+  function div_binding($$value) {
+    binding_callbacks[$$value ? "unshift" : "push"](() => {
+      inst = $$value;
+      $$invalidate(3, inst);
+    });
+  }
+  const mouseenter_handler = (e) => $$invalidate(0, mouseActive = true);
+  const mouseleave_handler = (e) => $$invalidate(0, mouseActive = false);
+  const mousemove_handler = (e) => set_store_value(xCoord, $xCoord = e.offsetX, $xCoord);
+  const click_handler_1 = (e) => set_store_value(xCoord, $xCoord = e.offsetX, $xCoord);
+  const pointermove_handler = (e) => {
+    set_store_value(xCoord, $xCoord = e.offsetX, $xCoord);
+    $$invalidate(0, mouseActive = true);
+  };
+  $$self.$$.update = () => {
+    if ($$self.$$.dirty & 6) {
+      $:
+        $$invalidate(5, ratio = $xCoord / (clientWidth !== null && clientWidth !== void 0 ? clientWidth : 1));
+    }
+    if ($$self.$$.dirty & 384) {
+      $:
+        $$invalidate(6, barStartTime = $localDayStart.plus({hours: $barStartHour}));
+    }
+    if ($$self.$$.dirty & 1280) {
+      $:
+        $$invalidate(9, barTotalMinutes = ($barEndHour - $barStartHour) * 60);
+    }
+    if ($$self.$$.dirty & 608) {
+      $:
+        $$invalidate(11, time = barStartTime.plus({minutes: ratio * barTotalMinutes}));
+    }
+    if ($$self.$$.dirty & 2085) {
+      $: {
+        if (mouseActive) {
+          cursorPosition.set({
+            active: true,
+            marginLeft: $xCoord,
+            ratio,
+            time
+          });
+        } else {
+          set_store_value(cursorPosition, $cursorPosition.active = false, $cursorPosition);
+        }
+      }
+    }
+  };
+  return [
+    mouseActive,
+    clientWidth,
+    $xCoord,
+    inst,
+    xCoord,
+    ratio,
+    barStartTime,
+    $localDayStart,
+    $barStartHour,
+    barTotalMinutes,
+    $barEndHour,
+    time,
+    click_handler,
+    div_elementresize_handler,
+    div_binding,
+    mouseenter_handler,
+    mouseleave_handler,
+    mousemove_handler,
+    click_handler_1,
+    pointermove_handler
+  ];
+}
+var MouseListener = class extends SvelteComponent {
+  constructor(options) {
+    super();
+    init(this, options, instance7, create_fragment8, safe_not_equal, {});
+  }
+};
+var MouseListener_svelte_default = MouseListener;
+
+// build/dist/MouseTimeCursor.svelte.js
+function create_if_block2(ctx) {
+  let timecursor;
+  let current;
+  timecursor = new TimeCursor_svelte_default({
+    props: {
+      ratio: ctx[0].ratio,
+      time: ctx[0].time,
+      backgroundColor: "white",
+      color: "#444"
+    }
+  });
+  return {
+    c() {
+      create_component(timecursor.$$.fragment);
+    },
+    m(target, anchor) {
+      mount_component(timecursor, target, anchor);
+      current = true;
+    },
+    p(ctx2, dirty) {
+      const timecursor_changes = {};
+      if (dirty & 1)
+        timecursor_changes.ratio = ctx2[0].ratio;
+      if (dirty & 1)
+        timecursor_changes.time = ctx2[0].time;
+      timecursor.$set(timecursor_changes);
+    },
+    i(local) {
+      if (current)
+        return;
+      transition_in(timecursor.$$.fragment, local);
+      current = true;
+    },
+    o(local) {
+      transition_out(timecursor.$$.fragment, local);
+      current = false;
+    },
+    d(detaching) {
+      destroy_component(timecursor, detaching);
+    }
+  };
+}
+function create_fragment9(ctx) {
+  let if_block_anchor;
+  let current;
+  let if_block = ctx[0].active && create_if_block2(ctx);
+  return {
+    c() {
+      if (if_block)
+        if_block.c();
+      if_block_anchor = empty();
+    },
+    m(target, anchor) {
+      if (if_block)
+        if_block.m(target, anchor);
+      insert(target, if_block_anchor, anchor);
+      current = true;
+    },
+    p(ctx2, [dirty]) {
+      if (ctx2[0].active) {
         if (if_block) {
           if_block.p(ctx2, dirty);
-          if (dirty & 8) {
+          if (dirty & 1) {
             transition_in(if_block, 1);
           }
         } else {
-          if_block = create_if_block(ctx2);
+          if_block = create_if_block2(ctx2);
           if_block.c();
           transition_in(if_block, 1);
-          if_block.m(div2, null);
+          if_block.m(if_block_anchor.parentNode, if_block_anchor);
         }
       } else if (if_block) {
         group_outros();
@@ -10746,81 +11825,119 @@ function create_fragment2(ctx) {
         });
         check_outros();
       }
-      if (!current || dirty & 2) {
-        attr(div2, "style", ctx2[1]);
-      }
     },
     i(local) {
       if (current)
         return;
-      transition_in(zonedtimedisplay.$$.fragment, local);
       transition_in(if_block);
       current = true;
     },
     o(local) {
-      transition_out(zonedtimedisplay.$$.fragment, local);
       transition_out(if_block);
       current = false;
     },
     d(detaching) {
-      if (detaching)
-        detach(div2);
-      destroy_component(zonedtimedisplay);
       if (if_block)
-        if_block.d();
+        if_block.d(detaching);
+      if (detaching)
+        detach(if_block_anchor);
     }
   };
 }
-function instance2($$self, $$props, $$invalidate) {
+function instance8($$self, $$props, $$invalidate) {
+  let $cursorPosition;
+  component_subscribe($$self, cursorPosition, ($$value) => $$invalidate(0, $cursorPosition = $$value));
+  return [$cursorPosition];
+}
+var MouseTimeCursor = class extends SvelteComponent {
+  constructor(options) {
+    super();
+    init(this, options, instance8, create_fragment9, safe_not_equal, {});
+  }
+};
+var MouseTimeCursor_svelte_default = MouseTimeCursor;
+
+// build/dist/colors.js
+var colors = [
+  "#FFDE6B",
+  "#EF89EE",
+  "#F79F1E",
+  "#02B8FF",
+  "#9F84EC",
+  "#15CBC4",
+  "#0092FD",
+  "#F63A57",
+  "#A2CB39",
+  "#FF6E2F",
+  "#FEB8B9",
+  "#af7aa1",
+  "#7EFFF5"
+];
+var colors_default = colors;
+
+// build/dist/ZoneHours.svelte.js
+function create_fragment10(ctx) {
+  let div;
+  return {
+    c() {
+      div = element("div");
+      attr(div, "class", "gradient svelte-1wlc8e0");
+      attr(div, "style", ctx[0]);
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+    },
+    p(ctx2, [dirty]) {
+      if (dirty & 1) {
+        attr(div, "style", ctx2[0]);
+      }
+    },
+    i: noop,
+    o: noop,
+    d(detaching) {
+      if (detaching)
+        detach(div);
+    }
+  };
+}
+function instance9($$self, $$props, $$invalidate) {
   let background;
   let $localDayStart;
   let $hours;
-  let $dayFraction;
-  let $cursorPosition;
-  component_subscribe($$self, localDayStart, ($$value) => $$invalidate(5, $localDayStart = $$value));
-  component_subscribe($$self, hours, ($$value) => $$invalidate(6, $hours = $$value));
-  component_subscribe($$self, dayFraction, ($$value) => $$invalidate(2, $dayFraction = $$value));
-  component_subscribe($$self, cursorPosition, ($$value) => $$invalidate(3, $cursorPosition = $$value));
+  component_subscribe($$self, localDayStart, ($$value) => $$invalidate(3, $localDayStart = $$value));
+  component_subscribe($$self, hours, ($$value) => $$invalidate(4, $hours = $$value));
   let {zone} = $$props;
   let {backgroundColor} = $$props;
   $$self.$$set = ($$props2) => {
     if ("zone" in $$props2)
-      $$invalidate(0, zone = $$props2.zone);
+      $$invalidate(1, zone = $$props2.zone);
     if ("backgroundColor" in $$props2)
-      $$invalidate(4, backgroundColor = $$props2.backgroundColor);
+      $$invalidate(2, backgroundColor = $$props2.backgroundColor);
   };
   $$self.$$.update = () => {
-    if ($$self.$$.dirty & 113) {
+    if ($$self.$$.dirty & 30) {
       $:
-        $$invalidate(1, background = `background: ${hourGradient($localDayStart, zone, backgroundColor, $hours)};`);
+        $$invalidate(0, background = `background: ${hourGradient($localDayStart, zone, backgroundColor, $hours)};`);
     }
   };
-  return [
-    zone,
-    background,
-    $dayFraction,
-    $cursorPosition,
-    backgroundColor,
-    $localDayStart,
-    $hours
-  ];
+  return [background, zone, backgroundColor, $localDayStart, $hours];
 }
 var ZoneHours = class extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance2, create_fragment2, safe_not_equal, {zone: 0, backgroundColor: 4});
+    init(this, options, instance9, create_fragment10, safe_not_equal, {zone: 1, backgroundColor: 2});
   }
 };
 var ZoneHours_svelte_default = ZoneHours;
 
 // build/dist/ZoneBars.svelte.js
-function get_each_context(ctx, list, i) {
+function get_each_context3(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[2] = list[i][0];
   child_ctx[3] = list[i][1];
   return child_ctx;
 }
-function create_each_block(key_1, ctx) {
+function create_each_block3(key_1, ctx) {
   let div;
   let t0_value = ctx[2] + "";
   let t0;
@@ -10841,7 +11958,7 @@ function create_each_block(key_1, ctx) {
       t0 = text(t0_value);
       t1 = space();
       create_component(zonehours.$$.fragment);
-      attr(div, "class", "label svelte-1muq3nw");
+      attr(div, "class", "label svelte-qbqbp4");
       set_style(div, "background-color", ctx[3]);
       this.first = div;
     },
@@ -10885,7 +12002,7 @@ function create_each_block(key_1, ctx) {
     }
   };
 }
-function create_fragment3(ctx) {
+function create_fragment11(ctx) {
   let each_blocks = [];
   let each_1_lookup = new Map();
   let each_1_anchor;
@@ -10893,9 +12010,9 @@ function create_fragment3(ctx) {
   let each_value = ctx[0];
   const get_key = (ctx2) => ctx2[2];
   for (let i = 0; i < each_value.length; i += 1) {
-    let child_ctx = get_each_context(ctx, each_value, i);
+    let child_ctx = get_each_context3(ctx, each_value, i);
     let key = get_key(child_ctx);
-    each_1_lookup.set(key, each_blocks[i] = create_each_block(key, child_ctx));
+    each_1_lookup.set(key, each_blocks[i] = create_each_block3(key, child_ctx));
   }
   return {
     c() {
@@ -10915,7 +12032,7 @@ function create_fragment3(ctx) {
       if (dirty & 1) {
         each_value = ctx2[0];
         group_outros();
-        each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx2, each_value, each_1_lookup, each_1_anchor.parentNode, outro_and_destroy_block, create_each_block, each_1_anchor, get_each_context);
+        each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx2, each_value, each_1_lookup, each_1_anchor.parentNode, outro_and_destroy_block, create_each_block3, each_1_anchor, get_each_context3);
         check_outros();
       }
     },
@@ -10942,7 +12059,7 @@ function create_fragment3(ctx) {
     }
   };
 }
-function instance3($$self, $$props, $$invalidate) {
+function instance10($$self, $$props, $$invalidate) {
   let zones_with_colors;
   let $zones;
   component_subscribe($$self, zones, ($$value) => $$invalidate(1, $zones = $$value));
@@ -10957,276 +12074,119 @@ function instance3($$self, $$props, $$invalidate) {
 var ZoneBars = class extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance3, create_fragment3, safe_not_equal, {});
+    init(this, options, instance10, create_fragment11, safe_not_equal, {});
   }
 };
 var ZoneBars_svelte_default = ZoneBars;
 
-// build/dist/CurrentTimeCursor.svelte.js
-function create_fragment4(ctx) {
-  let div3;
-  let div0;
-  let t;
-  let div2;
-  let div1;
-  let zonedtimedisplay;
+// build/dist/ZoneGrid.svelte.js
+function create_fragment12(ctx) {
+  let div;
+  let zonebars;
+  let t0;
+  let currenttimecursor;
+  let t1;
+  let mousetimecursor;
+  let t2;
+  let mouselistener;
   let current;
-  zonedtimedisplay = new ZonedTimeDisplay_svelte_default({});
+  zonebars = new ZoneBars_svelte_default({});
+  currenttimecursor = new CurrentTimeCursor_svelte_default({});
+  mousetimecursor = new MouseTimeCursor_svelte_default({});
+  mouselistener = new MouseListener_svelte_default({});
   return {
     c() {
-      div3 = element("div");
-      div0 = element("div");
-      t = space();
-      div2 = element("div");
-      div1 = element("div");
-      create_component(zonedtimedisplay.$$.fragment);
-      attr(div0, "class", "inner cursor svelte-421859");
-      set_style(div1, "transform", "translateY(-100%)");
-      attr(div2, "class", "inner svelte-421859");
-      attr(div3, "class", "position svelte-421859");
-      set_style(div3, "--dayFraction", ctx[0]);
+      div = element("div");
+      create_component(zonebars.$$.fragment);
+      t0 = space();
+      create_component(currenttimecursor.$$.fragment);
+      t1 = space();
+      create_component(mousetimecursor.$$.fragment);
+      t2 = space();
+      create_component(mouselistener.$$.fragment);
+      attr(div, "class", "grid svelte-4ozmyt");
     },
     m(target, anchor) {
-      insert(target, div3, anchor);
-      append(div3, div0);
-      append(div3, t);
-      append(div3, div2);
-      append(div2, div1);
-      mount_component(zonedtimedisplay, div1, null);
+      insert(target, div, anchor);
+      mount_component(zonebars, div, null);
+      append(div, t0);
+      mount_component(currenttimecursor, div, null);
+      append(div, t1);
+      mount_component(mousetimecursor, div, null);
+      append(div, t2);
+      mount_component(mouselistener, div, null);
       current = true;
     },
-    p(ctx2, [dirty]) {
-      if (!current || dirty & 1) {
-        set_style(div3, "--dayFraction", ctx2[0]);
-      }
-    },
+    p: noop,
     i(local) {
       if (current)
         return;
-      transition_in(zonedtimedisplay.$$.fragment, local);
+      transition_in(zonebars.$$.fragment, local);
+      transition_in(currenttimecursor.$$.fragment, local);
+      transition_in(mousetimecursor.$$.fragment, local);
+      transition_in(mouselistener.$$.fragment, local);
       current = true;
     },
     o(local) {
-      transition_out(zonedtimedisplay.$$.fragment, local);
+      transition_out(zonebars.$$.fragment, local);
+      transition_out(currenttimecursor.$$.fragment, local);
+      transition_out(mousetimecursor.$$.fragment, local);
+      transition_out(mouselistener.$$.fragment, local);
       current = false;
     },
     d(detaching) {
       if (detaching)
-        detach(div3);
-      destroy_component(zonedtimedisplay);
-    }
-  };
-}
-function instance4($$self, $$props, $$invalidate) {
-  let $dayFraction;
-  component_subscribe($$self, dayFraction, ($$value) => $$invalidate(0, $dayFraction = $$value));
-  return [$dayFraction];
-}
-var CurrentTimeCursor = class extends SvelteComponent {
-  constructor(options) {
-    super();
-    init(this, options, instance4, create_fragment4, safe_not_equal, {});
-  }
-};
-var CurrentTimeCursor_svelte_default = CurrentTimeCursor;
-
-// build/dist/Reference.svelte.js
-function create_fragment5(ctx) {
-  let div;
-  return {
-    c() {
-      div = element("div");
-      div.innerHTML = `<h2>helpful reference information</h2> 
-  <ul><li><a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">List of tz database time zones</a></li></ul>`;
-    },
-    m(target, anchor) {
-      insert(target, div, anchor);
-    },
-    p: noop,
-    i: noop,
-    o: noop,
-    d(detaching) {
-      if (detaching)
         detach(div);
+      destroy_component(zonebars);
+      destroy_component(currenttimecursor);
+      destroy_component(mousetimecursor);
+      destroy_component(mouselistener);
     }
   };
 }
-var Reference = class extends SvelteComponent {
+var ZoneGrid = class extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, null, create_fragment5, safe_not_equal, {});
+    init(this, options, null, create_fragment12, safe_not_equal, {});
   }
 };
-var Reference_svelte_default = Reference;
-
-// build/dist/MouseListener.svelte.js
-function create_fragment6(ctx) {
-  let div;
-  let div_resize_listener;
-  let mounted;
-  let dispose;
-  return {
-    c() {
-      div = element("div");
-      attr(div, "class", "area svelte-1vnfpt8");
-      add_render_callback(() => ctx[11].call(div));
-    },
-    m(target, anchor) {
-      insert(target, div, anchor);
-      div_resize_listener = add_resize_listener(div, ctx[11].bind(div));
-      if (!mounted) {
-        dispose = [
-          listen(div, "mouseenter", self2(ctx[12])),
-          listen(div, "mouseleave", self2(ctx[13])),
-          listen(div, "mousemove", self2(ctx[14])),
-          listen(div, "click", self2(ctx[15]))
-        ];
-        mounted = true;
-      }
-    },
-    p: noop,
-    i: noop,
-    o: noop,
-    d(detaching) {
-      if (detaching)
-        detach(div);
-      div_resize_listener();
-      mounted = false;
-      run_all(dispose);
-    }
-  };
-}
-function instance5($$self, $$props, $$invalidate) {
-  let ratio;
-  let barStartTime;
-  let barTotalMinutes;
-  let time;
-  let $xCoord;
-  let $localDayStart;
-  let $barStartHour;
-  let $barEndHour;
-  let $cursorPosition;
-  component_subscribe($$self, localDayStart, ($$value) => $$invalidate(6, $localDayStart = $$value));
-  component_subscribe($$self, barStartHour, ($$value) => $$invalidate(7, $barStartHour = $$value));
-  component_subscribe($$self, barEndHour, ($$value) => $$invalidate(9, $barEndHour = $$value));
-  component_subscribe($$self, cursorPosition, ($$value) => $$invalidate(16, $cursorPosition = $$value));
-  let xCoord = writable(0);
-  component_subscribe($$self, xCoord, (value) => $$invalidate(2, $xCoord = value));
-  let mouseActive = false;
-  let clientWidth;
-  function div_elementresize_handler() {
-    clientWidth = this.clientWidth;
-    $$invalidate(1, clientWidth);
-  }
-  const mouseenter_handler = (e) => $$invalidate(0, mouseActive = true);
-  const mouseleave_handler = (e) => $$invalidate(0, mouseActive = false);
-  const mousemove_handler = (e) => set_store_value(xCoord, $xCoord = e.offsetX, $xCoord);
-  const click_handler = (e) => set_store_value(xCoord, $xCoord = e.offsetX, $xCoord);
-  $$self.$$.update = () => {
-    if ($$self.$$.dirty & 6) {
-      $:
-        $$invalidate(4, ratio = $xCoord / (clientWidth !== null && clientWidth !== void 0 ? clientWidth : 1));
-    }
-    if ($$self.$$.dirty & 192) {
-      $:
-        $$invalidate(5, barStartTime = $localDayStart.plus({hours: $barStartHour}));
-    }
-    if ($$self.$$.dirty & 640) {
-      $:
-        $$invalidate(8, barTotalMinutes = ($barEndHour - $barStartHour) * 60);
-    }
-    if ($$self.$$.dirty & 304) {
-      $:
-        $$invalidate(10, time = barStartTime.plus({minutes: ratio * barTotalMinutes}));
-    }
-    if ($$self.$$.dirty & 1045) {
-      $: {
-        if (mouseActive) {
-          cursorPosition.set({
-            active: true,
-            marginLeft: $xCoord,
-            ratio,
-            time
-          });
-        } else {
-          set_store_value(cursorPosition, $cursorPosition.active = false, $cursorPosition);
-        }
-      }
-    }
-  };
-  return [
-    mouseActive,
-    clientWidth,
-    $xCoord,
-    xCoord,
-    ratio,
-    barStartTime,
-    $localDayStart,
-    $barStartHour,
-    barTotalMinutes,
-    $barEndHour,
-    time,
-    div_elementresize_handler,
-    mouseenter_handler,
-    mouseleave_handler,
-    mousemove_handler,
-    click_handler
-  ];
-}
-var MouseListener = class extends SvelteComponent {
-  constructor(options) {
-    super();
-    init(this, options, instance5, create_fragment6, safe_not_equal, {});
-  }
-};
-var MouseListener_svelte_default = MouseListener;
+var ZoneGrid_svelte_default = ZoneGrid;
 
 // build/dist/App.svelte.js
-function create_fragment7(ctx) {
+function create_fragment13(ctx) {
   let main;
-  let h2;
+  let timetitle;
+  let t0;
+  let zonegrid;
   let t1;
-  let div;
-  let gridtimecursor;
+  let configpanel;
   let t2;
-  let zonebars;
-  let t3;
-  let mouselistener;
-  let t4;
   let reference;
   let current;
-  gridtimecursor = new CurrentTimeCursor_svelte_default({});
-  zonebars = new ZoneBars_svelte_default({});
-  mouselistener = new MouseListener_svelte_default({});
+  timetitle = new TimeTitle_svelte_default({});
+  zonegrid = new ZoneGrid_svelte_default({});
+  configpanel = new ConfigPanel_svelte_default({});
   reference = new Reference_svelte_default({});
   return {
     c() {
       main = element("main");
-      h2 = element("h2");
-      h2.textContent = "timezones";
+      create_component(timetitle.$$.fragment);
+      t0 = space();
+      create_component(zonegrid.$$.fragment);
       t1 = space();
-      div = element("div");
-      create_component(gridtimecursor.$$.fragment);
+      create_component(configpanel.$$.fragment);
       t2 = space();
-      create_component(zonebars.$$.fragment);
-      t3 = space();
-      create_component(mouselistener.$$.fragment);
-      t4 = space();
       create_component(reference.$$.fragment);
-      attr(div, "class", "grid svelte-r3ry2o");
-      attr(main, "class", "svelte-r3ry2o");
+      attr(main, "class", "svelte-7r6wtg");
     },
     m(target, anchor) {
       insert(target, main, anchor);
-      append(main, h2);
+      mount_component(timetitle, main, null);
+      append(main, t0);
+      mount_component(zonegrid, main, null);
       append(main, t1);
-      append(main, div);
-      mount_component(gridtimecursor, div, null);
-      append(div, t2);
-      mount_component(zonebars, div, null);
-      append(div, t3);
-      mount_component(mouselistener, div, null);
-      append(main, t4);
+      mount_component(configpanel, main, null);
+      append(main, t2);
       mount_component(reference, main, null);
       current = true;
     },
@@ -11234,25 +12194,25 @@ function create_fragment7(ctx) {
     i(local) {
       if (current)
         return;
-      transition_in(gridtimecursor.$$.fragment, local);
-      transition_in(zonebars.$$.fragment, local);
-      transition_in(mouselistener.$$.fragment, local);
+      transition_in(timetitle.$$.fragment, local);
+      transition_in(zonegrid.$$.fragment, local);
+      transition_in(configpanel.$$.fragment, local);
       transition_in(reference.$$.fragment, local);
       current = true;
     },
     o(local) {
-      transition_out(gridtimecursor.$$.fragment, local);
-      transition_out(zonebars.$$.fragment, local);
-      transition_out(mouselistener.$$.fragment, local);
+      transition_out(timetitle.$$.fragment, local);
+      transition_out(zonegrid.$$.fragment, local);
+      transition_out(configpanel.$$.fragment, local);
       transition_out(reference.$$.fragment, local);
       current = false;
     },
     d(detaching) {
       if (detaching)
         detach(main);
-      destroy_component(gridtimecursor);
-      destroy_component(zonebars);
-      destroy_component(mouselistener);
+      destroy_component(timetitle);
+      destroy_component(zonegrid);
+      destroy_component(configpanel);
       destroy_component(reference);
     }
   };
@@ -11260,7 +12220,7 @@ function create_fragment7(ctx) {
 var App = class extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, null, create_fragment7, safe_not_equal, {});
+    init(this, options, null, create_fragment13, safe_not_equal, {});
   }
 };
 var App_svelte_default = App;

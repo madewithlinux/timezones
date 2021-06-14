@@ -14,12 +14,57 @@ body {
     "Helvetica Neue",
     sans-serif;
 }
-main.svelte-r3ry2o {
-  padding: 1em;
-  max-width: 240px;
+main.svelte-7r6wtg {
+  padding-left: 1em;
+  padding-right: 1em;
   margin: 0 auto;
 }
-.grid.svelte-r3ry2o {
+@media (max-width: 1000px) {
+  body {
+    padding: 0;
+  }
+  main.svelte-7r6wtg {
+    max-width: none;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+/* build/dist/ConfigPanel.svelte.css */
+.config.svelte-1w0tq5j {
+  width: max-content;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.config.svelte-1w0tq5j,
+label.svelte-1w0tq5j,
+input.svelte-1w0tq5j {
+  font-size: 1.2rem;
+}
+label.svelte-1w0tq5j {
+  justify-self: stretch;
+  align-self: stretch;
+}
+input.svelte-1w0tq5j,
+select.svelte-1w0tq5j {
+  justify-self: end;
+}
+input[type=number].svelte-1w0tq5j {
+  width: 80px;
+  text-align: end;
+}
+select.svelte-1w0tq5j {
+  width: min-content;
+}
+button.svelte-1w0tq5j {
+  margin: 20px;
+  padding: 10px;
+}
+
+/* build/dist/ZoneGrid.svelte.css */
+.grid.svelte-4ozmyt {
   position: relative;
   z-index: 0;
   display: grid;
@@ -27,35 +72,6 @@ main.svelte-r3ry2o {
   grid-template-areas: label time bar;
   column-gap: 2px;
   row-gap: 10px;
-}
-@media (min-width: 640px) {
-  main.svelte-r3ry2o {
-    max-width: none;
-  }
-}
-
-/* build/dist/CurrentTimeCursor.svelte.css */
-.position.svelte-421859 {
-  position: absolute;
-  height: 100%;
-  top: 0;
-  width: 0;
-  left: calc(var(--dayFraction) * 100%);
-  grid-column-start: 2;
-  grid-column-end: span 1;
-  justify-self: stretch;
-  align-self: stretch;
-}
-.inner.svelte-421859 {
-  position: absolute;
-  transform: translateX(calc(-100% * var(--dayFraction)));
-  z-index: 100;
-}
-.cursor.svelte-421859 {
-  width: 2px;
-  height: 100%;
-  background-color: #444;
-  z-index: -100;
 }
 
 /* build/dist/MouseListener.svelte.css */
@@ -73,48 +89,56 @@ main.svelte-r3ry2o {
 }
 
 /* build/dist/ZoneBars.svelte.css */
-.label.svelte-1muq3nw {
+.label.svelte-qbqbp4 {
   padding: 20px;
   padding-right: 40px;
 }
-.label.svelte-1muq3nw {
+.label.svelte-qbqbp4 {
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
 }
+@media (max-width: 1000px) {
+  .label.svelte-qbqbp4 {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+/* build/dist/TimeCursor.svelte.css */
+.cursor.svelte-1xa064o {
+  width: 4px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+.time.svelte-1xa064o {
+  width: max-content;
+  padding: 5px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
 
 /* build/dist/ZoneHours.svelte.css */
-.gradient.svelte-13jfrf0 {
+.gradient.svelte-1wlc8e0 {
   height: 100%;
   width: 100%;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
   position: relative;
 }
-.cursor.svelte-13jfrf0 {
-  width: 2px;
+
+/* build/dist/Position.svelte.css */
+.position.svelte-jpw9dr {
+  position: absolute;
   height: 100%;
-  z-index: 100;
+  top: 0;
+  left: calc(var(--ratio) * 100%);
+  width: 0;
 }
-.position.svelte-13jfrf0 {
+.inner.svelte-jpw9dr {
   position: absolute;
   top: 50%;
-  left: calc(var(--dayFraction) * 100%);
-  transform: translateX(-100%) translateY(-50%);
-}
-.time.svelte-13jfrf0 {
-  width: max-content;
-  padding: 5px;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-  z-index: 10000;
-}
-.current.svelte-13jfrf0 {
-  background-color: #444;
-  color: white;
-}
-.mouse.svelte-13jfrf0 {
-  background-color: white;
-  color: black;
+  right: 0;
+  transform: translateY(-50%);
 }
 
 /* build/dist/ZonedTimeDisplay.svelte.css */
