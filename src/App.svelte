@@ -1,6 +1,6 @@
 <script lang="ts">
-  import ConfigPanel from "./ConfigPanel.svelte";
-  import Reference from "./Reference.svelte";
+  import TimeZoneConfigPanel from "./TimeZoneConfigPanel.svelte";
+  import Reference from "./components/Reference.svelte";
   import TimeTitle from "./TimeTitle.svelte";
   import ZoneGrid from "./ZoneGrid.svelte";
 </script>
@@ -8,7 +8,7 @@
 <main>
   <TimeTitle />
   <ZoneGrid />
-  <ConfigPanel />
+  <TimeZoneConfigPanel />
   <Reference />
 </main>
 

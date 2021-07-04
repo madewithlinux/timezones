@@ -25,3 +25,24 @@ https://github.com/PixievoltNo1/svelte-writable-derived
 https://www.typescriptlang.org/docs/handbook/declaration-files/templates/module-d-ts.html#testing-your-types
 
 
+# TODO
+- [ ] factor out config panel
+- [ ] allow add new timezone
+- [ ] search box for selecting new timezone to add
+- [ ] drag to re-order timezones
+- [ ] add time markers on horizontal time bars
+- [ ] add option to make the time cursor snap to 15 minute increments
+
+
+# generic type svelte component
+https://github.com/dummdidumm/rfcs/blob/ts-typedefs-within-svelte-components/text/ts-typing-props-slots-events.md
+
+
+
+# generate type definitions for svelte-writable-derived
+https://github.com/PixievoltNo1/svelte-writable-derived
+tsc doesn't like it because the main file is `index.mjs` (even though it appears to be a ES6 module...)
+```bash
+
+```
+

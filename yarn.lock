@@ -2093,9 +2093,10 @@ qs@^6.5.2:
   dependencies:
     side-channel "^1.0.4"
 
-"query-store@git://github.com/madewithlinux/query-store":
-  version "1.1.1"
-  resolved "git://github.com/madewithlinux/query-store#497f36659a6554d8abffed8f7b2434c70228b875"
+query-store@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/query-store/-/query-store-1.1.2.tgz#16ba6a7ac45e6963d7ee30aa5830ae9359ef9c3c"
+  integrity sha512-dyOhq47foMRRoiK2f7lu3nNXeFbXG53oJQRzkuIbujf4Ko0En7CCVyT7RKKOT6orvTnMGb9Or3gsyF557SToYw==
   dependencies:
     svelte "^3.20.1"
 
@@ -2409,6 +2410,11 @@ svelte-preprocess@^4.0.0, svelte-preprocess@^4.7.2:
     "@types/sass" "^1.16.0"
     detect-indent "^6.0.0"
     strip-indent "^3.0.0"
+
+svelte-writable-derived@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/svelte-writable-derived/-/svelte-writable-derived-2.1.1.tgz#9e3cec9ab60729ca0bd3e4edf8421f22bbd4e39a"
+  integrity sha512-bmboHUWpO/dZCBGm/gLGeT53cbbdmb9igLlycQYFxhmNB1Frt1Y1QV6PJeJj16TeUzDcR5XD3ddE7O8iXQHclw==
 
 svelte@^3.20.1, svelte@^3.37.0:
   version "3.38.2"

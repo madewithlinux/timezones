@@ -1,8 +1,37 @@
 <script lang="ts">
   import { isNil } from "lodash";
   import query from "query-store";
+  import Button from "./components/ConfigPanel/Button.svelte";
+  import ConfigPanel from "./components/ConfigPanel/ConfigPanel.svelte";
+  import InputNumber from "./components/ConfigPanel/InputNumber.svelte";
+  import InputSelect from "./components/ConfigPanel/InputSelect.svelte";
   import { barEndHour, barStartHour, localTimeZone, zones } from "./timeStores";
 </script>
+
+<ConfigPanel title="config">
+  <InputSelect id="localTimeZone" bind:value={$query.tz} options={$zones} selected={$localTimeZone} />
+  <InputNumber
+    id="barStartHour"
+    integer
+    inputProps={{
+      max: String($barEndHour - 1),
+      placeholder: String($barStartHour),
+    }}
+    bind:value={$query.start}
+    on:focus={(e) => (e.currentTarget.value = String($barStartHour))}
+  />
+  <InputNumber
+    id="barEndHour"
+    integer
+    inputProps={{
+      max: String($barEndHour - 1),
+      placeholder: String($barEndHour),
+    }}
+    bind:value={$query.end}
+    on:focus={(e) => (e.currentTarget.value = String($barEndHour))}
+  />
+  <Button wide text="reset to defaults" on:click={() => ($query = {})} />
+</ConfigPanel>
 
 <h1>config</h1>
 <div class="config">
