@@ -3,7 +3,7 @@ import { DateTime, Duration } from "luxon";
 import { isNil, round } from 'lodash';
 import { color } from 'd3-color';
 import query from "query-store";
-import { derivedMemo, derivedWithKey } from './derivedMemo';
+import { derivedMemo, derivedWithKey } from '$lib/derivedMemo';
 
 export const nowSecond = readable(DateTime.now(), function start(set) {
 	const interval = setInterval(() => {

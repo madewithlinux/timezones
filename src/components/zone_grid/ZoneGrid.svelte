@@ -1,8 +1,8 @@
 <script lang="ts">
-  import CurrentTimeCursor from "./CurrentTimeCursor.svelte";
-  import MouseListener from "./MouseListener.svelte";
-  import MouseTimeCursor from "./MouseTimeCursor.svelte";
-  import ZoneBars from "./ZoneBars.svelte";
+  import CurrentTimeCursor from "$src/components/time_cursor/CurrentTimeCursor.svelte";
+  import MouseListener from "$src/components/time_cursor/MouseListener.svelte";
+  import MouseTimeCursor from "$src/components/time_cursor/MouseTimeCursor.svelte";
+  import ZoneBars from "$src/components/zone_grid/ZoneBars.svelte";
 </script>
 
 <div class="grid">

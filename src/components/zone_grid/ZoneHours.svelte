@@ -1,6 +1,6 @@
 <!-- ZoneHours.svelte -->
 <script lang="ts">
-  import { hourGradient, hours, localDayStart } from "./timeStores";
+  import { hourGradient, hours, localDayStart } from "$lib/timeStores";
 
   export let zone: string;
   export let backgroundColor: string;

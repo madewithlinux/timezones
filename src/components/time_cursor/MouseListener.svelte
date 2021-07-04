@@ -5,7 +5,7 @@
     barStartHour,
     cursorPosition,
     localDayStart,
-  } from "./timeStores";
+  } from "$lib/timeStores";
 
   let xCoord = writable(0);
   let mouseActive = false;

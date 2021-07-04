@@ -1,12 +1,9 @@
 <script lang="ts">
-  import colors from "./colors";
-  import { zones } from "./timeStores";
+  import colors from "$lib/colors";
+  import { zones } from "$lib/timeStores";
   import ZoneHours from "./ZoneHours.svelte";
 
-  $: zones_with_colors = $zones.map((zone, i) => [
-    zone,
-    colors[i % colors.length],
-  ]);
+  $: zones_with_colors = $zones.map((zone, i) => [zone, colors[i % colors.length]]);
 </script>
 
 {#each zones_with_colors as [zone, color] (zone)}

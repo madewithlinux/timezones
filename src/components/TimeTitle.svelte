@@ -1,6 +1,6 @@
 <script lang="ts">
   import { DateTime } from "luxon";
-  import { nowSecond, localTimeZone } from "./timeStores";
+  import { nowSecond, localTimeZone } from "$lib/timeStores";
 
   $: timeStr = $nowSecond
     .setZone($localTimeZone)

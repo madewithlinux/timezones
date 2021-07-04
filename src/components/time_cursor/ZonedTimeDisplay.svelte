@@ -1,6 +1,6 @@
 <script lang="ts">
   import { DateTime } from "luxon";
-  import { nowMinute, localTimeZone } from "./timeStores";
+  import { nowMinute, localTimeZone } from "$lib/timeStores";
 
   export let zone: string = $localTimeZone
   export let timeFormat = DateTime.TIME_SIMPLE

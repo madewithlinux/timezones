@@ -1,8 +1,8 @@
 <script lang="ts">
-  import TimeZoneConfigPanel from "./TimeZoneConfigPanel.svelte";
-  import Reference from "./components/Reference.svelte";
-  import TimeTitle from "./TimeTitle.svelte";
-  import ZoneGrid from "./ZoneGrid.svelte";
+  import TimeZoneConfigPanel from "$components/TimeZoneConfigPanel.svelte";
+  import Reference from "$components/Reference.svelte";
+  import TimeTitle from "$components/TimeTitle.svelte";
+  import ZoneGrid from "$src/components/zone_grid/ZoneGrid.svelte";
 </script>
 
 <main>

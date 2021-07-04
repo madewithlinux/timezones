@@ -1,6 +1,6 @@
 <script lang="ts">
-  import TimeCursor from "./TimeCursor.svelte";
-  import { cursorPosition } from "./timeStores";
+  import TimeCursor from "$src/components/time_cursor/TimeCursor.svelte";
+  import { cursorPosition } from "$lib/timeStores";
 </script>
 
 {#if $cursorPosition.active}

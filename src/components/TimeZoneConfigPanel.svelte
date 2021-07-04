@@ -2,11 +2,11 @@
   import { DateTime } from "luxon";
   import type { Writable } from "svelte/store";
   import { writable } from "svelte/store";
-  import ConfigPanel from "./components/ConfigPanel/ConfigPanel.svelte";
-  import InputNumber from "./components/ConfigPanel/InputNumber.svelte";
-  import InputSelect from "./components/ConfigPanel/InputSelect.svelte";
-  import QueryStateButtons from "./components/ConfigPanel/QueryStateButtons.svelte";
-  import { barEndHour,barStartHour,zones } from "./timeStores";
+  import ConfigPanel from "$components/ConfigPanel/ConfigPanel.svelte";
+  import InputNumber from "$components/ConfigPanel/InputNumber.svelte";
+  import InputSelect from "$components/ConfigPanel/InputSelect.svelte";
+  import QueryStateButtons from "$components/ConfigPanel/QueryStateButtons.svelte";
+  import { barEndHour,barStartHour,zones } from "$lib/timeStores";
 
   interface Config {
     localTimeZone?: string;

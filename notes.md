@@ -26,7 +26,7 @@ https://www.typescriptlang.org/docs/handbook/declaration-files/templates/module-
 
 
 # TODO
-- [ ] factor out config panel
+- [x] factor out config panel
 - [ ] allow add new timezone
 - [ ] search box for selecting new timezone to add
 - [ ] drag to re-order timezones

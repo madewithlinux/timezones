@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { DateTime } from "luxon";
   import { fade } from "svelte/transition";
-  import Position from "./Position.svelte";
-  import { zones } from "./timeStores";
-  import ZonedTimeDisplay from "./ZonedTimeDisplay.svelte";
+  import Position from "$src/components/time_cursor/Position.svelte";
+  import { zones } from "$lib/timeStores";
+  import ZonedTimeDisplay from "$src/components/time_cursor/ZonedTimeDisplay.svelte";
 
   export let ratio: number;
   export let time: DateTime;
