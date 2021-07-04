@@ -1,30 +1,45 @@
 <script lang="ts">
   import { writable } from "svelte/store";
-  import {
-    barEndHour,
-    barStartHour,
-    cursorPosition,
-    localDayStart,
-  } from "$lib/timeStores";
+  import { spring } from "svelte/motion";
+  import { barEndHour, barStartHour, cursorPosition, localDayStart } from "$lib/timeStores";
+  import { timeZoneConfig } from "$components/TimeZoneConfigPanel.svelte";
 
-  let xCoord = writable(0);
+  
+  const xCoord = writable(0);
   let mouseActive = false;
   let clientWidth: number | undefined;
-
+  
   $: ratio = $xCoord / (clientWidth ?? 1);
-
+  const roundRatio = spring(0);
+  
   $: barStartTime = $localDayStart.plus({ hours: $barStartHour });
   $: barTotalMinutes = ($barEndHour - $barStartHour) * 60;
   $: time = barStartTime.plus({ minutes: ratio * barTotalMinutes });
+  
+  $: roundTo15Min = $timeZoneConfig.snapTo15Minutes;
+  
+  $: if (mouseActive && roundTo15Min) {
+    const roundTime = time.plus({ minutes: 15 - (time.minute % 15) }).startOf("minute");
+    const roundMinutes = Math.round(roundTime.diff(barStartTime, "minutes").minutes);
+    roundRatio.set(roundMinutes / barTotalMinutes);
+    cursorPosition.set({
+      active: true,
+      marginLeft: $xCoord,
+      ratio: $roundRatio,
+      time: roundTime,
+    });
+  }
 
   $: {
     if (mouseActive) {
-      cursorPosition.set({
-        active: true,
-        marginLeft: $xCoord,
-        ratio,
-        time,
-      });
+      if (!roundTo15Min) {
+        cursorPosition.set({
+          active: true,
+          marginLeft: $xCoord,
+          ratio,
+          time,
+        });
+      }
     } else {
       $cursorPosition.active = false;
     }

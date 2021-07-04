@@ -6,35 +6,21 @@
 
   export let id: string;
   export let label: string = lowerCase(id);
-  export let integer: boolean = false;
-  export let fillDefaultOnFocus: boolean = true;
 
   export let inputProps: Partial<svelte.JSX.SvelteInputProps> | undefined = undefined;
   export let labelProps: Partial<svelte.JSX.HTMLProps<HTMLLabelElement>> | undefined = undefined;
 
   const { config, defaults } = getConfigContext();
-  const value: Writable<number> = propertyStore(config, id);
+  const value: Writable<boolean> = propertyStore(config, id);
   const placeholder = defaults[id];
-
-  const onChange: svelte.JSX.FormEventHandler<HTMLInputElement> = (e) => {
-    if (integer) {
-      $value = Math.round(e.currentTarget.valueAsNumber);
-    }
-  };
 </script>
 
 <label for={id} {...labelProps}>{label ?? lowerCase(id)}</label>
 <input
   {id}
-  type="number"
-  bind:value={$value}
-  on:change|self={onChange}
-  {placeholder}
-  on:focus={(e) => {
-    if (fillDefaultOnFocus && isNaN(e.currentTarget.valueAsNumber)) {
-      e.currentTarget.value = placeholder;
-    }
-  }}
+  type="checkbox"
+  checked={$value ?? placeholder}
+  on:change={(e) => ($value = e.currentTarget.checked)}
   {...inputProps}
   on:focus
   on:change
@@ -54,9 +40,10 @@
     align-self: stretch;
   }
 
-  input[type="number"] {
+  input[type="checkbox"] {
     justify-self: end;
-    width: 80px;
     text-align: end;
+    margin: 0;
+    width: 2rem;
   }
 </style>

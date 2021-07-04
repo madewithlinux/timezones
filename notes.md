@@ -53,3 +53,7 @@ echo '}'
 ) > types/svelte-writable-derived.d.ts
 ```
 
+
+# how to refactor/move svelte component
+this vscode extension does it well: https://marketplace.visualstudio.com/items?itemName=stringham.move-ts
+

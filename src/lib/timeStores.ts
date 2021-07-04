@@ -37,6 +37,7 @@ export const zones = writable([
 ].map(tz => DateTime.now().setZone(tz).zoneName)
 )
 
+// TODO: unite these derived config stores with the store in TimeZoneConfigPanel.svelte
 export const localTimeZone = derived(query,
 	$query => $query.tz ?? DateTime.now().toLocal().zoneName
 )

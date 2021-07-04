@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { fromPairs,isNil,omit,toPairs,values } from "lodash";
+  import { fromPairs,isBoolean,isNil,omit,toPairs,values } from "lodash";
   import query from "query-store";
   import Button from "./Button.svelte";
   import { getConfigContext } from "./ConfigPanel.svelte";
@@ -27,7 +27,7 @@
 
   function saveConfigToQuery() {
     $query = {
-      ...$query,
+      ...omit($query, values(queryKeyMap)),
       ...fromPairs(
         toPairs($config)
           .filter(([k, v]) => k in queryKeyMap && v != defaults[k] && !isNil(v))
