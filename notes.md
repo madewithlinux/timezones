@@ -43,6 +43,13 @@ https://github.com/dummdidumm/rfcs/blob/ts-typedefs-within-svelte-components/tex
 https://github.com/PixievoltNo1/svelte-writable-derived
 tsc doesn't like it because the main file is `index.mjs` (even though it appears to be a ES6 module...)
 ```bash
-
+cp node_modules/svelte-writable-derived/index.{mjs,js}
+npx tsc --allowJs --declaration node_modules/svelte-writable-derived/index.js --emitDeclarationOnly
+rm node_modules/svelte-writable-derived/index.js
+(
+echo 'declare module "svelte-writable-derived" {'
+cat node_modules/svelte-writable-derived/index.d.ts
+echo '}'
+) > types/svelte-writable-derived.d.ts
 ```
 

@@ -1,38 +1,42 @@
 <script lang="ts">
-  import { get, lowerCase, set } from "lodash";
+  import { get, isNil, lowerCase, set } from "lodash";
   import { getConfigContext } from "./ConfigPanel.svelte";
+  import { propertyStore } from "svelte-writable-derived";
+  import type { Writable } from "svelte/store";
 
   type Value = $$Generic<string | number>;
 
   export let id: string;
   export let label: string = lowerCase(id);
-  // export let value: Value | undefined = undefined;
   export let integer: boolean = false;
+  export let fillDefaultOnFocus: boolean = true;
+
   export let inputProps: Partial<svelte.JSX.SvelteInputProps> | undefined = undefined;
   export let labelProps: Partial<svelte.JSX.HTMLProps<HTMLLabelElement>> | undefined = undefined;
 
-  const { config } = getConfigContext();
-  $: value = get($config, id);
-  $: setValue = (value: Value) => ($config = set($config, id, value));
+  const { config, defaults } = getConfigContext();
+  const value: Writable<number> = propertyStore(config, id);
+  const placeholder = defaults[id];
 
-  // $: value =
-
-  const integerOnChange: svelte.JSX.FormEventHandler<HTMLInputElement> = (e) => {
+  const onChange: svelte.JSX.FormEventHandler<HTMLInputElement> = (e) => {
     if (integer) {
-      value = Math.round(e.currentTarget.valueAsNumber) as Value;
+      $value = Math.round(e.currentTarget.valueAsNumber);
     }
   };
 </script>
-
-<!-- {@debug label, value} -->
-<!-- {@debug $$props} -->
 
 <label for={id} {...labelProps}>{label ?? lowerCase(id)}</label>
 <input
   {id}
   type="number"
-  bind:value
-  on:change|self={integerOnChange}
+  bind:value={$value}
+  on:change|self={onChange}
+  {placeholder}
+  on:focus={(e) => {
+    if (fillDefaultOnFocus && isNaN(e.currentTarget.valueAsNumber)) {
+      e.currentTarget.value = placeholder;
+    }
+  }}
   {...inputProps}
   on:focus
   on:change
@@ -41,33 +45,6 @@
   on:blur
 />
 
-<!-- {#if integer}
-  <input
-    {id}
-    type="number"
-    {value}
-    on:change|self={integerOnChange}
-    
-    {...inputProps}
-    on:focus
-    on:change
-    on:click
-    on:contextmenu
-    on:blur
-  />
-{:else}
-  <input
-    {id}
-    type="number"
-    bind:value
-    {...inputProps}
-    on:focus
-    on:change
-    on:click
-    on:contextmenu
-    on:blur
-  />
-{/if} -->
 <style>
   label,
   input {

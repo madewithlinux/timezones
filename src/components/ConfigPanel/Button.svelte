@@ -13,7 +13,6 @@
     grid-column-end: span 2;
   }
   button {
-    margin: 20px;
     padding: 10px;
   }
 </style>
