@@ -23,6 +23,8 @@
     "query-store": "^1.1.2",
     "svelte": "^3.37.0",
     "svelte-check": "^2.0.0",
+    "svelte-dragdroplist": "^1.1.1",
+    "svelte-select": "^4.2.0",
     "svelte-writable-derived": "^2.1.1",
     "vite": "^2.3.8"
   },

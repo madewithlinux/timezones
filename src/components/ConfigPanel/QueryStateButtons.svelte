@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { fromPairs,isBoolean,isNil,omit,toPairs,values } from "lodash";
+  import { fromPairs,isArray,isBoolean,isNil,isNumber,isObject,isString,omit,toPairs,values } from "lodash";
   import query from "query-store";
   import Button from "./Button.svelte";
   import { getConfigContext } from "./ConfigPanel.svelte";
@@ -25,13 +25,25 @@
     );
   }
 
-  function saveConfigToQuery() {
+  export function toStringForQuery(value: any): string {
+    if (isString(value) || isNumber(value)) {
+      return String(value)
+    }
+    if (isArray(value) || isObject(value)) {
+      return JSON.stringify(value)
+    }
+    // TODO: unclear if this is the right thing to do...
+    return String(value)
+  }
+
+  export function saveConfigToQuery() {
     $query = {
       ...omit($query, values(queryKeyMap)),
       ...fromPairs(
         toPairs($config)
-          .filter(([k, v]) => k in queryKeyMap && v != defaults[k] && !isNil(v))
-          .map(([k, v]) => [queryKeyMap[k], String(v)])
+          .filter(([k, v]) => k in queryKeyMap && !isNil(v))
+          .filter(([k, v]) => toStringForQuery(v) != toStringForQuery(defaults[k]))
+          .map(([k, v]) => [queryKeyMap[k], toStringForQuery(v)])
       ),
     };
   }

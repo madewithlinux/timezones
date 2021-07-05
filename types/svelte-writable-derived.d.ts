@@ -43,7 +43,7 @@ declare module "svelte-writable-derived" {
    *
    * @returns {Store} A writable store.
    */
-  export function propertyStore<T>(origin: Writable<T>, propName: keyof T): Writable<T[typeof propName]>;
+  export function propertyStore<T, K extends keyof T>(origin: Writable<T>, propName: K): Writable<T[K]>;
     export function propertyStore(
       origin: Writable<any>,
       propName: string | symbol | Array<string | symbol>

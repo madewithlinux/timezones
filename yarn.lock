@@ -2438,6 +2438,11 @@ svelte-check@^2.0.0:
     svelte-preprocess "^4.0.0"
     typescript "*"
 
+svelte-dragdroplist@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/svelte-dragdroplist/-/svelte-dragdroplist-1.1.1.tgz#b5fbe241ceed893a1baa5c3e03a0e12e36faee04"
+  integrity sha512-63jrgGeBG3J+ZjHhfnzhRdikj/lAdAbGDoryiGw2lrGr5/et3Tp8Y0Vmgf6t4lSkhq/DMmjxbwaVmWNj4nGiUg==
+
 svelte-hmr@^0.14.4:
   version "0.14.4"
   resolved "https://registry.yarnpkg.com/svelte-hmr/-/svelte-hmr-0.14.4.tgz#b7ef2bfeef23916e0e912828c50645ca572ac355"
@@ -2452,6 +2457,11 @@ svelte-preprocess@^4.0.0, svelte-preprocess@^4.7.2:
     "@types/sass" "^1.16.0"
     detect-indent "^6.0.0"
     strip-indent "^3.0.0"
+
+svelte-select@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/svelte-select/-/svelte-select-4.2.0.tgz#e0097df36ee7dddf6c300ee73be56efdd986d6c8"
+  integrity sha512-YT1ySSunDhV8rzAMJXK91itqtLogBAVQzG6hXwQncp5vplVY2fGWJi0uwRV85HQT1KoqtWMuXmq+Gw449BC0CA==
 
 svelte-writable-derived@^2.1.1:
   version "2.1.1"

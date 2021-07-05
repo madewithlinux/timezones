@@ -1,24 +1,16 @@
-<script lang="ts" context="module">
-  export interface Config {
-    localTimeZone?: string;
-    barStartHour?: number;
-    barEndHour?: number;
-    snapTo15Minutes?: boolean;
-  }
-
-  export const timeZoneConfig: Writable<Config> = writable({});
-</script>
-
 <script lang="ts">
-  import { DateTime } from "luxon";
-  import type { Writable } from "svelte/store";
-  import { writable } from "svelte/store";
   import ConfigPanel from "$components/ConfigPanel/ConfigPanel.svelte";
   import InputNumber from "$components/ConfigPanel/InputNumber.svelte";
   import InputSelect from "$components/ConfigPanel/InputSelect.svelte";
   import QueryStateButtons from "$components/ConfigPanel/QueryStateButtons.svelte";
-  import { barEndHour, barStartHour, zones } from "$lib/timeStores";
+  import type { Config } from "$lib/timeStores";
+  import { barEndHour, barStartHour, defaultZones, timeZoneConfig, zones } from "$lib/timeStores";
+  import { timeZonesNames } from "@vvo/tzdb";
+  import { fromPairs, isNil, keys } from "lodash";
+  import { DateTime } from "luxon";
+  import type { Writable } from "svelte/store";
   import InputCheck from "./ConfigPanel/InputCheck.svelte";
+  import InputSvelteSelect from "./ConfigPanel/InputSvelteSelect.svelte";
 
   let config: Writable<Config> = timeZoneConfig;
 
@@ -27,13 +19,14 @@
     barStartHour: 7,
     barEndHour: 19,
     snapTo15Minutes: false,
+    zones: defaultZones,
   };
 
   const queryKeyMap = {
+    ...fromPairs(keys(defaults).map((k) => [k, k])),
     localTimeZone: "tz",
     barStartHour: "start",
     barEndHour: "end",
-    snapTo15Minutes: "snapTo15Minutes",
   };
 </script>
 
@@ -42,5 +35,11 @@
   <InputNumber id="barStartHour" integer inputProps={{ max: $barEndHour - 1 }} />
   <InputNumber id="barEndHour" integer inputProps={{ min: $barStartHour + 1 }} />
   <InputCheck id="snapTo15Minutes" />
+  <InputSvelteSelect
+    id="zones"
+    options={[...timeZonesNames, "UTC"]
+      // only valid time zones
+      .filter((tz) => !isNil(DateTime.now().setZone(tz).zoneName))}
+  />
   <QueryStateButtons {queryKeyMap} autoload autosave />
 </ConfigPanel>

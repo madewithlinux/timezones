@@ -2,7 +2,7 @@
   import { writable } from "svelte/store";
   import { spring } from "svelte/motion";
   import { barEndHour, barStartHour, cursorPosition, localDayStart } from "$lib/timeStores";
-  import { timeZoneConfig } from "$components/TimeZoneConfigPanel.svelte";
+  import { timeZoneConfig } from "$lib/timeStores";
 
   
   const xCoord = writable(0);
