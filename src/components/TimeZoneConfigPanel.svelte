@@ -4,7 +4,7 @@
   import InputSelect from "$components/ConfigPanel/InputSelect.svelte";
   import QueryStateButtons from "$components/ConfigPanel/QueryStateButtons.svelte";
   import type { Config } from "$lib/timeStores";
-  import { barEndHour, barStartHour, defaultZones, timeZoneConfig, zones } from "$lib/timeStores";
+  import { barEndHour, barStartHour, defaultConfig, timeZoneConfig, zones } from "$lib/timeStores";
   import { timeZonesNames } from "@vvo/tzdb";
   import { fromPairs, isNil, keys } from "lodash";
   import { DateTime } from "luxon";
@@ -12,16 +12,8 @@
   import InputCheck from "./ConfigPanel/InputCheck.svelte";
   import InputSvelteSelect from "./ConfigPanel/InputSvelteSelect.svelte";
 
-  let config: Writable<Config> = timeZoneConfig;
-
-  const defaults: Config = {
-    localTimeZone: DateTime.now().toLocal().zoneName,
-    barStartHour: 7,
-    barEndHour: 19,
-    snapTo15Minutes: false,
-    zones: defaultZones,
-  };
-
+  const config: Writable<Config> = timeZoneConfig;
+  const defaults: Config = defaultConfig;
   const queryKeyMap = {
     ...fromPairs(keys(defaults).map((k) => [k, k])),
     localTimeZone: "tz",

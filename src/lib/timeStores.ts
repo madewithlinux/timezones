@@ -3,6 +3,7 @@ import { color } from "d3-color";
 import { round } from "lodash";
 import { DateTime } from "luxon";
 import query from "query-store";
+import { propertyStore } from "svelte-writable-derived";
 import type { Writable } from "svelte/store";
 import { derived, readable, writable } from "svelte/store";
 
@@ -14,7 +15,28 @@ export interface Config {
   zones?: string[];
 }
 
-export const timeZoneConfig: Writable<Config> = writable({});
+export const defaultZones = [
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "Europe/London",
+  "Japan",
+  "UTC",
+].map((tz) => DateTime.now().setZone(tz).zoneName);
+
+export const defaultConfig: Config = {
+  localTimeZone: DateTime.now().toLocal().zoneName,
+  barStartHour: 7,
+  barEndHour: 19,
+  snapTo15Minutes: false,
+  zones: defaultZones,
+};
+
+export const timeZoneConfig: Writable<Config> = writable({
+  // explicitly clone the array
+  zones: [...defaultConfig.zones],
+});
 
 export const nowSecond = readable(DateTime.now(), function start(set) {
   const interval = setInterval(() => {
@@ -35,16 +57,6 @@ export const now = readable(DateTime.now(), function start(set) {
     clearInterval(interval);
   };
 });
-
-export const defaultZones = [
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "Europe/London",
-  "Japan",
-  "UTC",
-].map((tz) => DateTime.now().setZone(tz).zoneName);
 
 export const zones = derived(
   timeZoneConfig,

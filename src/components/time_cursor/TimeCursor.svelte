@@ -33,6 +33,7 @@
 <Position {ratio} style={cursorStyle}>
   <div transition:fade class="cursor" style={colors} />
 </Position>
+<!-- TODO: animate the re-ordering of these -->
 {#each $zones as zone, i (zone)}
   <Position {ratio} style={rowStyle(i)}>
     <div transition:fade class="time" style={colors} slot="align_center">
