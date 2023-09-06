@@ -142,18 +142,17 @@ export const hourGradient = (
 ) => {
   const length = hours.length;
   const baseColor = color(backgroundColor)!;
-  // console.log('localDayStart.zoneName', localDayStart.zoneName)
 
   const colors = hours.map((hour, i) => {
     const zoneHour = localDayStart.plus({ hours: hour }).setZone(zone).hour;
     const color = baseColor.darker(hourDarkness(zoneHour));
 
-    const start = round((100 * i) / length);
-    const end = round((100 * (i + 1)) / length);
-    return `linear-gradient(to right, transparent ${start}%, ${color} ${start}% ${end}%, transparent ${end}%)`;
+    const start = ((100 * i) / length);
+    const end = ((100 * (i + 1)) / length);
+    return `${color} ${start}% ${end}%`;
   });
 
-  return colors.join(",\n");
+  return `linear-gradient(to right, ${colors.join(",\n")})`;
 };
 
 export const cursorPosition = writable({

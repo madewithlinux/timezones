@@ -59,7 +59,7 @@
   }
   .label {
     padding: 20px;
-    padding-right: 40px;
+    /* padding-right: 40px; */
     padding-left: 0;
   }
 

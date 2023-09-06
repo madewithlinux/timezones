@@ -25,8 +25,8 @@
 
   main {
     /* padding: 1em; */
-    padding-left: 1em;
-    padding-right: 1em;
+    /* padding-left: 1em; */
+    /* padding-right: 1em; */
     /* max-width: 240px; */
     margin: 0 auto;
   }
